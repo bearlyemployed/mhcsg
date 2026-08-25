@@ -8,7 +8,7 @@
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #6C5CE7, #00B894);
+    background: #A6192E;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -48,6 +48,23 @@
     margin-bottom: 22px;
     position: relative;
   }
+  .stack-card {
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    background: #4b3f9e;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255,255,255,0.15);
+  }
+  .stack-card.s1 {
+    transform: translate(6px, 10px) rotate(2deg);
+    z-index: 1;
+  }
+  .stack-card.s2 {
+    transform: translate(-6px, 18px) rotate(-3deg);
+    z-index: 0;
+    opacity: 0.85;
+  }
   .card {
     position: relative;
     width: 100%;
@@ -55,6 +72,7 @@
     cursor: pointer;
     transform-style: preserve-3d;
     transition: transform 0.6s;
+    z-index: 2;
   }
   .card.flipped {
     transform: rotateY(180deg);
@@ -143,15 +161,15 @@
     text-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
   .verdict-word {
-    font-size: 34px;
+    font-size: 30px;
     font-weight: 800;
     z-index: 2;
     text-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
   .back-inner {
-    font-size: 16px;
-    font-weight: 500;
-    margin-top: 12px;
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 14px;
     line-height: 1.4;
     z-index: 2;
     text-shadow: 0 1px 4px rgba(0,0,0,0.5);
@@ -252,6 +270,8 @@
   </div>
 
   <div class="stage" id="stage">
+    <div class="stack-card s2"></div>
+    <div class="stack-card s1"></div>
     <div class="card" id="card">
       <div class="face front" id="front" style="background-image: url('sa.png');">
         <span class="icon">TAP DECK</span>
@@ -276,14 +296,58 @@
 <script>
 const statements = [
   { text: "The Opportunities Fund can support study abroad.", answer: "Fact" },
-  { text: "First-year students can immediately apply for the Opportunities Fund.", answer: "Myth" },
+  { text: "First-year students can immediately apply for the Opportunities Fund.", answer: "Myth",
+    correction: "Students become eligible beginning in the spring of sophomore year." },
   { text: "Students may become eligible for the Opportunities Fund beginning in the spring of sophomore year.", answer: "Fact" },
-  { text: "The Opportunities Fund can only be used for study abroad.", answer: "Myth" },
+  { text: "The Opportunities Fund can ONLY be used for study abroad.", answer: "Myth",
+    correction: "It can also support internships, research, and other approved opportunities." },
   { text: "Internships and research may also qualify for Opportunities Fund support.", answer: "Fact" },
-  { text: "The Macaulay Tuition Scholarship covers student fees.", answer: "Myth" },
-  { text: "Students should contact Macaulay before dropping below full-time enrollment.", answer: "Fact" },
-  { text: "Scholarships and grants are automatically guaranteed.", answer: "Myth" },
-  { text: "Students are responsible for monitoring their financial aid records.", answer: "Fact" }
+  { text: "The Macaulay Tuition Scholarship covers student fees.", answer: "Myth",
+    correction: "It covers tuition, not student fees." },
+  { text: "Students should contact their Macaulay Advisor before dropping below full-time enrollment.", answer: "Fact" },
+  { text: "Scholarships and grants are automatically guaranteed.", answer: "Myth",
+    correction: "Scholarships and grants are not automatically guaranteed — eligibility and renewal depend on meeting requirements." },
+  { text: "Students are responsible for monitoring their financial aid records.", answer: "Fact" },
+
+  { text: "The Opportunities Fund may support study abroad, internships, and research.", answer: "Fact" },
+  { text: "The Opportunities Fund is only for study abroad.", answer: "Myth",
+    correction: "It can also support internships, research, and other approved opportunities." },
+  { text: "Students may apply beginning in the spring of sophomore year.", answer: "Fact" },
+  { text: "Every eligible student is guaranteed Opportunities Fund support.", answer: "Myth",
+    correction: "Eligibility does not guarantee funding — some awards are competitive." },
+  { text: "The Opportunities Fund is a one-time grant.", answer: "Fact" },
+  { text: "Students should wait until after paying for an opportunity to ask whether it qualifies.", answer: "Myth",
+    correction: "Students should check whether an opportunity qualifies before paying for it." },
+  { text: "Some Opportunities Fund awards are competitive.", answer: "Fact" },
+  { text: "Students should review the requirements before committing to an opportunity.", answer: "Fact" },
+
+  { text: "The tuition scholarship may cover the remaining tuition after other eligible aid is applied.", answer: "Fact" },
+  { text: "Students never need to complete FAFSA or TAP if they receive the Macaulay Tuition Scholarship.", answer: "Myth",
+    correction: "Students must still complete required financial aid applications like FAFSA and TAP." },
+  { text: "Students must complete the required financial aid applications, even if they do not expect to qualify for aid.", answer: "Fact" },
+  { text: "The tuition scholarship is usually applied months before the college posts tuition charges.", answer: "Myth",
+    correction: "The scholarship is typically applied closer to when the college posts tuition charges, not months ahead." },
+  { text: "A bursar notice does not always mean that a student has lost the scholarship.", answer: "Fact" },
+  { text: "Students are responsible for reviewing their CUNYfirst financial aid and tuition records.", answer: "Fact" },
+
+  { text: "Part-time enrollment never requires approval.", answer: "Myth",
+    correction: "Part-time enrollment requires approval before dropping below full-time status." },
+  { text: "Dropping or withdrawing from a class can affect scholarship coverage.", answer: "Fact" },
+  { text: "An email reminder is the only way students are expected to know about a requirement.", answer: "Myth",
+    correction: "Students are expected to proactively check their Macaulay email and CUNYfirst account, not just wait for reminders." },
+  { text: "Students should regularly check their Macaulay email and CUNYfirst account.", answer: "Fact" },
+  { text: "Scholarship requirements only matter during a student's first year.", answer: "Myth",
+    correction: "Scholarship requirements apply throughout a student's time in the program, not just the first year." },
+  { text: "Students should keep copies of financial aid documents and important emails.", answer: "Fact" },
+
+  { text: "Scholarships and grants are the same as student loans.", answer: "Myth",
+    correction: "Unlike loans, scholarships and grants generally do not have to be repaid when program conditions are met." },
+  { text: "A grant generally does not have to be repaid when all program conditions are met.", answer: "Fact" },
+  { text: "Research opportunities are only available to science majors.", answer: "Myth",
+    correction: "Research opportunities are open to students across majors, not just science majors." },
+  { text: "Study abroad can include programs lasting less than a full semester.", answer: "Fact" },
+  { text: "Ignoring a request for missing information will make it disappear.", answer: "Myth",
+    correction: "Ignoring a request for missing information can delay or jeopardize aid — students should respond promptly." }
 ];
 
 const cardImages = ["sa.png", "ir.png", "sg.png"];
@@ -380,14 +444,17 @@ function handleAnswer(choice, btn) {
 
   const isCorrect = choice === current.answer;
 
-  verdict.innerHTML = '<div class="verdict-word">' + current.answer.toUpperCase() + '</div>' +
-    '<div class="back-inner">' + current.text + '</div>';
+  var correctionHtml = current.answer === 'Myth' && current.correction
+    ? '<div class="back-inner"><strong>Correct answer:</strong> ' + current.correction + '</div>'
+    : '<div class="back-inner">' + current.text + '</div>';
+
+  verdict.innerHTML = '<div class="verdict-word">' + current.answer.toUpperCase() + '</div>' + correctionHtml;
   card.classList.add('flipped');
 
   if (isCorrect) {
     score++;
     streak++;
-    feedback.innerHTML = '<span class="correct">Correct! It is a ' + current.answer + '.</span>';
+    feedback.innerHTML = '<span class="correct">Correct! It is a ' + current.answer + '. 🎉 Spin the wheel for your prize!</span>';
     setTimeout(function () {
       card.classList.add('correctPulse');
       spawnConfetti();

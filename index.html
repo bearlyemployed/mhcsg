@@ -25,27 +25,97 @@
     font-size: 28px;
     margin: 0 0 4px;
   }
+  .office-logo {
+    display: block;
+    max-width: 140px;
+    height: auto;
+    margin: 0 auto 12px;
+  }
   .sub {
     opacity: 0.85;
     margin-bottom: 20px;
     font-size: 14px;
   }
-  .scoreboard {
+  .start-screen {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    gap: 24px;
-    margin-bottom: 18px;
-    font-size: 14px;
+    min-height: 60vh;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
   }
-  .scoreboard div {
-    background: rgba(255,255,255,0.15);
-    padding: 6px 14px;
-    border-radius: 20px;
+  .icon-rain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
   }
+  .icon-rain span {
+    position: absolute;
+    top: -60px;
+    font-size: 26px;
+    opacity: 0;
+    animation-name: iconFall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  @keyframes iconFall {
+    0% { transform: translateY(0); opacity: 0; }
+    12% { opacity: 0.35; }
+    80% { opacity: 0.35; }
+    100% { transform: translateY(420px); opacity: 0; }
+  }
+  .start-screen > *:not(.icon-rain) {
+    position: relative;
+    z-index: 1;
+  }
+  .start-screen .start-title {
+    font-size: 48px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .start-screen .start-sub {
+    font-size: 20px;
+    opacity: 0.9;
+    margin-bottom: 32px;
+    font-weight: 600;
+  }
+  .start-btn {
+    background: white;
+    color: #A6192E;
+    font-size: 26px;
+    font-weight: 800;
+    padding: 24px 56px;
+    border-radius: 40px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.25), 0 12px 20px rgba(0,0,0,0.25);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    animation: startPulse 1.6s ease-in-out infinite;
+  }
+  .start-btn:active {
+    transform: translateY(6px);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.25), 0 4px 10px rgba(0,0,0,0.2);
+  }
+  @keyframes startPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .game-content {
+    display: none;
+  }
+  .game-content.active {
+    display: block;
+  }
+  .scoreboard { display: none; }
   .stage {
     perspective: 1200px;
     height: 320px;
     margin-bottom: 22px;
+    margin-top: -10px;
     position: relative;
   }
   .stack-card {
@@ -70,14 +140,15 @@
     width: 100%;
     height: 100%;
     cursor: pointer;
-    -webkit-transform-style: preserve-3d;
-    transform-style: preserve-3d;
-    transition: transform 0.6s;
     z-index: 2;
   }
-  .card.flipped {
-    -webkit-transform: rotateY(180deg);
-    transform: rotateY(180deg);
+  .card.flipping .face {
+    animation: flipScale 0.5s ease;
+  }
+  @keyframes flipScale {
+    0% { transform: scaleX(1); }
+    50% { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
   }
   .card.shuffling {
     animation: shuffle 0.6s ease;
@@ -96,26 +167,24 @@
     100% { transform: rotate(0deg) scale(1); }
   }
   @keyframes correctPulse {
-    0% { transform: rotateY(180deg) scale(1); }
-    30% { transform: rotateY(180deg) scale(1.08); }
-    50% { transform: rotateY(180deg) scale(0.98); }
-    70% { transform: rotateY(180deg) scale(1.04); }
-    100% { transform: rotateY(180deg) scale(1); }
+    0% { transform: scale(1); }
+    30% { transform: scale(1.08); }
+    50% { transform: scale(0.98); }
+    70% { transform: scale(1.04); }
+    100% { transform: scale(1); }
   }
   @keyframes wrongShake {
-    0% { transform: rotateY(180deg) translateX(0); }
-    20% { transform: rotateY(180deg) translateX(-14px); }
-    40% { transform: rotateY(180deg) translateX(12px); }
-    60% { transform: rotateY(180deg) translateX(-8px); }
-    80% { transform: rotateY(180deg) translateX(6px); }
-    100% { transform: rotateY(180deg) translateX(0); }
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-14px); }
+    40% { transform: translateX(12px); }
+    60% { transform: translateX(-8px); }
+    80% { transform: translateX(6px); }
+    100% { transform: translateX(0); }
   }
   .face {
     position: absolute;
     inset: 0;
     border-radius: 18px;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -127,6 +196,7 @@
   }
   .front {
     color: white;
+    z-index: 2;
   }
   .front::before {
     content: '';
@@ -137,8 +207,19 @@
   .back {
     background: #2d2d2d;
     color: white;
-    -webkit-transform: rotateY(180deg);
-    transform: rotateY(180deg);
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .card.flipped .front {
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .card.flipped .back {
+    z-index: 2;
+    opacity: 1;
+    pointer-events: auto;
   }
   .back::before {
     content: '';
@@ -159,38 +240,61 @@
   }
   .statement-text {
     font-weight: 700;
-    font-size: 26px;
-    line-height: 1.35;
+    font-size: 32px;
+    line-height: 1.3;
     z-index: 2;
     text-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
   .verdict-word {
-    font-size: 30px;
+    font-size: 38px;
     font-weight: 800;
     z-index: 2;
     text-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
+  .verdict-word.is-correct {
+    color: #2ecc71;
+  }
+  .verdict-word.is-incorrect {
+    color: #ff4d4d;
+  }
   .back-inner {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 600;
     margin-top: 14px;
     line-height: 1.4;
     z-index: 2;
+    color: white;
     text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  .word-correct {
+    color: #2ecc71;
+  }
+  .word-incorrect {
+    color: #ff4d4d;
   }
   .buttons {
     display: flex;
-    gap: 16px;
+    align-items: center;
+    gap: 20px;
     justify-content: center;
+    margin-top: 24px;
     margin-bottom: 16px;
   }
+  .or-divider {
+    font-size: 18px;
+    font-weight: 700;
+    opacity: 0.8;
+    text-transform: uppercase;
+  }
   button {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 800;
-    padding: 20px 44px;
-    border-radius: 34px;
+    padding: 26px 52px;
+    border-radius: 40px;
     border: none;
     cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     transition: transform 0.12s ease, box-shadow 0.12s ease;
     box-shadow: 0 8px 0 rgba(0,0,0,0.25), 0 12px 20px rgba(0,0,0,0.25);
   }
@@ -261,25 +365,60 @@
     70% { transform: translateY(0) scale(1.05) rotate(4deg); }
     100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
   }
+
+  .marquee-wrap {
+    overflow: hidden;
+    white-space: nowrap;
+    background: #ffd93d;
+    border-radius: 30px;
+    padding: 12px 0;
+    margin-top: 22px;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 3;
+    display: none;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.2), 0 8px 16px rgba(0,0,0,0.25);
+  }
+  .marquee-wrap.active {
+    display: block;
+  }
+  .marquee-track {
+    display: inline-block;
+    white-space: nowrap;
+    animation: marqueeScroll 7s linear infinite;
+    font-size: 18px;
+    font-weight: 800;
+    color: #8a5c00;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .marquee-track span {
+    padding: 0 24px;
+  }
+  @keyframes marqueeScroll {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
 </style>
 </head>
 <body>
 <div class="app">
-  <h1>Myth or Fact?</h1>
-  <div class="sub">Tap the deck to draw a statement, then guess.</div>
-
-  <div class="scoreboard">
-    <div id="score">Score: 0 / 0</div>
-    <div id="streak">Streak: 0</div>
+  <img src="logosg.png" alt="Office logo" class="office-logo" />
+  <div class="start-screen" id="startScreen">
+    <div class="icon-rain" id="iconRain"></div>
+    <div class="start-title">Myth or Fact</div>
+    <div class="start-sub">Correct Answers Win A Prize</div>
+    <button class="start-btn" id="startBtn">Play</button>
   </div>
 
+  <div class="game-content" id="gameContent">
   <div class="stage" id="stage">
     <div class="stack-card s2"></div>
     <div class="stack-card s1"></div>
     <div class="card" id="card">
       <div class="face front" id="front" style="background-image: url('sa.png');">
-        <span class="icon">TAP DECK</span>
-        <div class="statement-text">Tap the card to draw a statement</div>
+        <span class="icon">STATEMENT</span>
+        <div class="statement-text" id="frontText">Loading...</div>
       </div>
       <div class="face back" id="back">
         <div id="verdict"></div>
@@ -287,14 +426,22 @@
     </div>
   </div>
 
-  <div class="feedback" id="feedback"></div>
+  <div class="feedback" id="feedback" style="display:none;"></div>
+
+  <div class="marquee-wrap" id="marqueeWrap">
+    <div class="marquee-track">
+      <span>Spin the Wheel for a Prize!</span><span>Spin the Wheel for a Prize!</span><span>Spin the Wheel for a Prize!</span><span>Spin the Wheel for a Prize!</span>
+    </div>
+  </div>
 
   <div class="buttons" id="answerButtons" style="display:none;">
     <button class="btn-myth" id="mythBtn">Myth</button>
+    <div class="or-divider">or</div>
     <button class="btn-fact" id="factBtn">Fact</button>
   </div>
 
   <button class="btn-next" id="nextBtn" style="display:none;">Next card →</button>
+  </div>
 </div>
 
 <script>
@@ -358,9 +505,6 @@ const cardImages = ["sa.png", "ir.png", "sg.png"];
 
 let deck = [];
 let current = null;
-let score = 0;
-let total = 0;
-let streak = 0;
 let answered = false;
 
 const card = document.getElementById('card');
@@ -370,11 +514,10 @@ const verdict = document.getElementById('verdict');
 const feedback = document.getElementById('feedback');
 const answerButtons = document.getElementById('answerButtons');
 const nextBtn = document.getElementById('nextBtn');
-const scoreEl = document.getElementById('score');
-const streakEl = document.getElementById('streak');
+const stage = document.getElementById('stage');
+const marqueeWrap = document.getElementById('marqueeWrap');
 const mythBtn = document.getElementById('mythBtn');
 const factBtn = document.getElementById('factBtn');
-const stage = document.getElementById('stage');
 
 function shuffleDeck() {
   deck = [...statements];
@@ -388,24 +531,19 @@ function randomImage() {
   return cardImages[Math.floor(Math.random() * cardImages.length)];
 }
 
-function updateScoreboard() {
-  scoreEl.textContent = `Score: ${score} / ${total}`;
-  streakEl.textContent = `Streak: ${streak}`;
-}
-
 function drawCard() {
   if (deck.length === 0) shuffleDeck();
   current = deck.pop();
   card.classList.remove('flipped', 'correctPulse', 'wrongShake');
   card.classList.add('shuffling');
-  setTimeout(() => card.classList.remove('shuffling'), 600);
+  setTimeout(function () { card.classList.remove('shuffling'); }, 600);
 
   front.style.backgroundImage = "url('" + randomImage() + "')";
   front.innerHTML = '<span class="icon">STATEMENT</span><div class="statement-text">' + current.text + '</div>';
   answered = false;
-  feedback.textContent = '';
   answerButtons.style.display = 'flex';
   nextBtn.style.display = 'none';
+  marqueeWrap.classList.remove('active');
   mythBtn.disabled = false;
   factBtn.disabled = false;
 }
@@ -439,7 +577,6 @@ function spawnSadFace() {
 function handleAnswer(choice, btn) {
   if (answered || !current) return;
   answered = true;
-  total++;
 
   btn.classList.add('pressed');
   setTimeout(() => btn.classList.remove('pressed'), 150);
@@ -448,30 +585,39 @@ function handleAnswer(choice, btn) {
 
   const isCorrect = choice === current.answer;
 
-  var correctionHtml = current.answer === 'Myth' && current.correction
-    ? '<div class="back-inner"><strong>Correct answer:</strong> ' + current.correction + '</div>'
-    : '<div class="back-inner">' + current.text + '</div>';
+  var correctionHtml;
+  if (isCorrect) {
+    correctionHtml = current.answer === 'Myth' && current.correction
+      ? '<div class="back-inner"><strong><span class="word-correct">Correct!</span> ' + current.correction + '</strong></div>'
+      : '<div class="back-inner"><strong><span class="word-correct">Correct!</span> ' + current.text + '</strong></div>';
+  } else {
+    correctionHtml = current.answer === 'Myth' && current.correction
+      ? '<div class="back-inner"><span class="word-incorrect">Incorrect</span> — it\u2019s actually a Myth. ' + current.correction + '</div>'
+      : '<div class="back-inner"><span class="word-incorrect">Incorrect</span> — it\u2019s actually a Fact. ' + current.text + '</div>';
+  }
 
-  verdict.innerHTML = '<div class="verdict-word">' + current.answer.toUpperCase() + '</div>' + correctionHtml;
-  card.classList.add('flipped');
+  verdict.innerHTML = '<div class="verdict-word ' + (isCorrect ? 'is-correct' : 'is-incorrect') + '">' + current.answer.toUpperCase() + '</div>' + correctionHtml;
+  card.classList.add('flipping');
+  setTimeout(function () {
+    card.classList.add('flipped');
+  }, 250);
+  setTimeout(function () {
+    card.classList.remove('flipping');
+  }, 500);
 
   if (isCorrect) {
-    score++;
-    streak++;
-    feedback.innerHTML = '<span class="correct">Correct! It is a ' + current.answer + '. 🎉 Spin the wheel for your prize!</span>';
     setTimeout(function () {
       card.classList.add('correctPulse');
       spawnConfetti();
     }, 620);
+    marqueeWrap.classList.add('active');
   } else {
-    streak = 0;
-    feedback.innerHTML = '<span class="wrong">Not quite — it is actually a ' + current.answer + '.</span>';
     setTimeout(function () {
       card.classList.add('wrongShake');
       spawnSadFace();
     }, 620);
+    marqueeWrap.classList.remove('active');
   }
-  updateScoreboard();
 
   answerButtons.style.display = 'none';
   nextBtn.style.display = 'inline-block';
@@ -486,8 +632,30 @@ mythBtn.addEventListener('click', function () { handleAnswer('Myth', mythBtn); }
 factBtn.addEventListener('click', function () { handleAnswer('Fact', factBtn); });
 nextBtn.addEventListener('click', drawCard);
 
-shuffleDeck();
-updateScoreboard();
+const startScreen = document.getElementById('startScreen');
+const gameContent = document.getElementById('gameContent');
+const startBtn = document.getElementById('startBtn');
+const iconRain = document.getElementById('iconRain');
+
+const rainIcons = ['\u{1F3AE}', '\u{1F579}\u{FE0F}', '\u{1F3AE}', '\u{1F3B2}', '\u{1F579}\u{FE0F}'];
+const rainCount = 14;
+for (let i = 0; i < rainCount; i++) {
+  const el = document.createElement('span');
+  el.textContent = rainIcons[Math.floor(Math.random() * rainIcons.length)];
+  el.style.left = (Math.random() * 92) + '%';
+  const duration = 5 + Math.random() * 4;
+  const delay = Math.random() * 8;
+  el.style.animationDuration = duration + 's';
+  el.style.animationDelay = '-' + delay + 's';
+  el.style.fontSize = (20 + Math.random() * 14) + 'px';
+  iconRain.appendChild(el);
+}
+
+startBtn.addEventListener('click', function () {
+  startScreen.style.display = 'none';
+  gameContent.classList.add('active');
+  drawCard();
+});
 </script>
 </body>
 </html>

@@ -466,7 +466,6 @@
     <button class="btn-fact" id="factBtn">Fact</button>
   </div>
 
-  <button class="btn-next" id="nextBtn" style="display:none;">Next card →</button>
   </div>
 </div>
 
@@ -477,18 +476,17 @@ const statements = [
     correction: "Students become eligible beginning in the spring of sophomore year." },
   { text: "Students may become eligible for the Opportunities Fund beginning in the spring of sophomore year.", answer: "Fact" },
   { text: "The Opportunities Fund can ONLY be used for study abroad.", answer: "Myth",
-    correction: "It can also support internships, research, and other approved opportunities." },
+    correction: "It can also support internships and research experiences locally or abroad." },
   { text: "Internships and research may also qualify for Opportunities Fund support.", answer: "Fact" },
   { text: "The Macaulay Tuition Scholarship covers student fees.", answer: "Myth",
     correction: "It covers tuition, not student fees." },
   { text: "Students should contact their Macaulay Advisor before dropping below full-time enrollment.", answer: "Fact" },
   { text: "Scholarships and grants are automatically guaranteed.", answer: "Myth",
-    correction: "Scholarships and grants are not automatically guaranteed — eligibility and renewal depend on meeting requirements." },
+    correction: "Relevant scholarship criteria must be met first." },
   { text: "Students are responsible for monitoring their financial aid records.", answer: "Fact" },
+  { text: "Students must be charged in-state tuition to be eligible for the Macaulay tuition scholarship.", answer: "Fact" },
 
   { text: "The Opportunities Fund may support study abroad, internships, and research.", answer: "Fact" },
-  { text: "The Opportunities Fund is only for study abroad.", answer: "Myth",
-    correction: "It can also support internships, research, and other approved opportunities." },
   { text: "Students may apply beginning in the spring of sophomore year.", answer: "Fact" },
   { text: "Every eligible student is guaranteed Opportunities Fund support.", answer: "Myth",
     correction: "Eligibility does not guarantee funding — some awards are competitive." },
@@ -503,8 +501,9 @@ const statements = [
     correction: "Students must still complete required financial aid applications like FAFSA and TAP." },
   { text: "Students must complete the required financial aid applications, even if they do not expect to qualify for aid.", answer: "Fact" },
   { text: "The tuition scholarship is usually applied months before the college posts tuition charges.", answer: "Myth",
-    correction: "The scholarship is typically applied closer to when the college posts tuition charges, not months ahead." },
-  { text: "A bursar notice does not always mean that a student has lost the scholarship.", answer: "Fact" },
+    correction: "The scholarship is typically applied closer the start of the given term, not months ahead." },
+  { text: "A bursar notice does not always mean that a student has lost the scholarship.", answer: "Fact",
+    detail: "Students may get Bursar notices if fees are due, or an overall balance if scholarship eligibility not met." },
   { text: "Students are responsible for reviewing their CUNYfirst financial aid and tuition records.", answer: "Fact" },
 
   { text: "Part-time enrollment never requires approval.", answer: "Myth",
@@ -539,7 +538,6 @@ const back = document.getElementById('back');
 const verdict = document.getElementById('verdict');
 const feedback = document.getElementById('feedback');
 const answerButtons = document.getElementById('answerButtons');
-const nextBtn = document.getElementById('nextBtn');
 const stage = document.getElementById('stage');
 const marqueeWrap = document.getElementById('marqueeWrap');
 const mythBtn = document.getElementById('mythBtn');
@@ -568,7 +566,6 @@ function drawCard() {
   front.innerHTML = '<span class="icon">STATEMENT</span><div class="statement-text">' + current.text + '</div>';
   answered = false;
   answerButtons.style.display = 'flex';
-  nextBtn.style.display = 'none';
   marqueeWrap.classList.remove('active');
   mythBtn.disabled = false;
   factBtn.disabled = false;
@@ -611,15 +608,20 @@ function handleAnswer(choice, btn) {
 
   const isCorrect = choice === current.answer;
 
+  var explanationText;
+  if (current.answer === 'Myth' && current.correction) {
+    explanationText = current.correction;
+  } else if (current.answer === 'Fact' && current.detail) {
+    explanationText = current.text + ' ' + current.detail;
+  } else {
+    explanationText = current.text;
+  }
+
   var correctionHtml;
   if (isCorrect) {
-    correctionHtml = current.answer === 'Myth' && current.correction
-      ? '<div class="back-inner"><strong><span class="word-correct">Correct!</span> ' + current.correction + '</strong></div>'
-      : '<div class="back-inner"><strong><span class="word-correct">Correct!</span> ' + current.text + '</strong></div>';
+    correctionHtml = '<div class="back-inner"><strong><span class="word-correct">Correct!</span> ' + explanationText + '</strong></div>';
   } else {
-    correctionHtml = current.answer === 'Myth' && current.correction
-      ? '<div class="back-inner"><span class="word-incorrect">Incorrect</span> — it\u2019s actually a Myth. ' + current.correction + '</div>'
-      : '<div class="back-inner"><span class="word-incorrect">Incorrect</span> — it\u2019s actually a Fact. ' + current.text + '</div>';
+    correctionHtml = '<div class="back-inner"><span class="word-incorrect">Incorrect.</span> ' + explanationText + '</div>';
   }
 
   verdict.innerHTML = '<div class="verdict-word ' + (isCorrect ? 'is-correct' : 'is-incorrect') + '">' + current.answer.toUpperCase() + '</div>' + correctionHtml;
@@ -646,17 +648,23 @@ function handleAnswer(choice, btn) {
   }
 
   answerButtons.style.display = 'none';
-  nextBtn.style.display = 'inline-block';
+
+  setTimeout(function () {
+    returnToStart();
+  }, 7500);
 }
 
-card.addEventListener('click', function () {
-  if (!answered && current) return;
-  drawCard();
-});
+function returnToStart() {
+  gameContent.classList.remove('active');
+  startScreen.style.display = 'flex';
+  marqueeWrap.classList.remove('active');
+  card.classList.remove('flipped', 'correctPulse', 'wrongShake');
+  current = null;
+  answered = false;
+}
 
 mythBtn.addEventListener('click', function () { handleAnswer('Myth', mythBtn); });
 factBtn.addEventListener('click', function () { handleAnswer('Fact', factBtn); });
-nextBtn.addEventListener('click', drawCard);
 
 const startScreen = document.getElementById('startScreen');
 const gameContent = document.getElementById('gameContent');

@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Staff Meeting Bingo</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --ink: #0F262F;
+  --ink-2: #17394A;
+  --rule: #2C5568;
+  --paper: #FBF6E9;
+  --gold: #E9B23C;
+  --gold-deep: #C4841B;
+  --rose: #E2685B;
+  --mist: #9FBECB;
+  --dauber-1: #F0C25C;
+  --dauber-2: #C4841B;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  background:
+    radial-gradient(1100px 520px at 50% -12%, #1B4658 0%, rgba(27,70,88,0) 62%),
+    var(--ink);
+  color: var(--paper);
+  padding: 22px 16px 44px;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 1020px; margin: 0 auto; }
+.display { font-family: 'Archivo Black', 'Arial Black', system-ui, sans-serif; letter-spacing: -0.01em; }
+.lede { color: var(--mist); font-size: 15px; line-height: 1.6; max-width: 56ch; margin: 0 0 18px; }
+.quiet { color: var(--mist); font-size: 13px; }
+
+/* header */
+.marquee { display: flex; gap: 6px; justify-content: center; margin-bottom: 6px; }
+.marquee span {
+  font-family: 'Archivo Black', 'Arial Black', sans-serif;
+  font-size: clamp(30px, 9vw, 62px);
+  line-height: 1;
+  color: var(--ink);
+  background: var(--gold);
+  width: clamp(44px, 13vw, 86px);
+  text-align: center;
+  border-radius: 999px;
+  padding: 10px 0 12px;
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,0.18);
+}
+.marquee span:nth-child(2) { background: #F2D06B; }
+.marquee span:nth-child(3) { background: var(--rose); color: var(--paper); }
+.marquee span:nth-child(4) { background: #F2D06B; }
+.sub { text-align: center; color: var(--mist); font-size: 14px; margin: 0 0 26px; }
+
+/* panels */
+.panel { background: var(--ink-2); border: 1px solid var(--rule); border-radius: 14px; padding: 18px; }
+.panel + .panel { margin-top: 14px; }
+.home { max-width: 460px; margin: 0 auto; }
+.field { display: block; margin-bottom: 14px; }
+.field > span { display: block; font-size: 13px; color: var(--mist); margin-bottom: 6px; }
+input, select, button { font: inherit; }
+input, select {
+  width: 100%; font-size: 16px; color: var(--paper); background: #0C1F27;
+  border: 1px solid var(--rule); border-radius: 10px; padding: 11px 12px;
+}
+input::placeholder { color: #5F8496; }
+input:focus-visible, select:focus-visible, button:focus-visible {
+  outline: 3px solid var(--gold); outline-offset: 2px;
+}
+.code-input { text-transform: uppercase; letter-spacing: 0.28em; font-weight: 600; }
+.btn {
+  font-weight: 600; font-size: 15px; border: 0; border-radius: 10px; padding: 12px 18px;
+  cursor: pointer; background: var(--gold); color: #22150A; box-shadow: inset 0 -3px 0 rgba(0,0,0,0.22);
+}
+.btn:hover { background: #F2C25C; }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn-quiet {
+  background: transparent; color: var(--paper); border: 1px solid var(--rule);
+  box-shadow: none; padding: 9px 14px; font-size: 14px;
+}
+.btn-quiet:hover { background: #12303D; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.divider { display: flex; align-items: center; gap: 12px; color: var(--mist); font-size: 13px; margin: 20px 0; }
+.divider::before, .divider::after { content: ""; height: 1px; background: var(--rule); flex: 1; }
+.error { color: #FFC0B8; font-size: 14px; margin-top: 10px; }
+.empty { color: var(--mist); font-size: 13px; margin-top: 8px; line-height: 1.5; }
+
+/* avatars */
+.faces { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+@media (max-width: 420px) { .faces { grid-template-columns: repeat(6, 1fr); } }
+.face {
+  font-size: 20px; line-height: 1; padding: 7px 0; cursor: pointer;
+  background: #0C1F27; border: 1px solid var(--rule); border-radius: 10px;
+}
+.face:hover { background: #143140; }
+.face[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); }
+.avatar { font-size: 18px; width: 24px; text-align: center; }
+
+/* game */
+.bar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.roomcode { display: flex; align-items: baseline; gap: 10px; }
+.roomcode b { font-family: 'Archivo Black', sans-serif; font-size: 30px; letter-spacing: 0.16em; color: var(--gold); }
+.tag { display: inline-block; font-size: 13px; border: 1px solid var(--rule); border-radius: 999px; padding: 4px 11px; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(230px, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.card { background: var(--paper); border-radius: 14px; padding: 12px; color: var(--ink); }
+.head { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 6px; }
+.head span { font-family: 'Archivo Black', sans-serif; text-align: center; font-size: clamp(18px, 4.4vw, 30px); line-height: 1.15; }
+.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.cell {
+  position: relative; aspect-ratio: 1 / 1; border: 1px solid #D9CFB4; border-radius: 9px;
+  background: #FFFDF6; color: #123; font-size: clamp(8px, 1.65vw, 12px); line-height: 1.2;
+  padding: 5px 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  text-align: center; overflow: hidden; hyphens: auto;
+}
+.cell:hover { border-color: var(--gold-deep); }
+.cell.marked::after {
+  content: ""; position: absolute; inset: 8%; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, var(--dauber-1), var(--dauber-2));
+  mix-blend-mode: multiply;
+}
+.cell.marked { color: #2A1B05; font-weight: 600; }
+.cell.win { border-color: var(--rose); box-shadow: inset 0 0 0 2px var(--rose); }
+.cell.free { background: #F6ECCF; font-weight: 600; }
+.cell > span.label { position: relative; z-index: 1; }
+.cell.win.sparkle { animation: twinkle 820ms ease-in-out infinite alternate; }
+.cell .spark { position: absolute; top: -2px; right: 1px; z-index: 2; font-size: 11px; animation: spark 900ms ease-in-out infinite; }
+@keyframes twinkle {
+  from { box-shadow: inset 0 0 0 2px var(--rose); }
+  to { box-shadow: inset 0 0 0 3px var(--gold), 0 0 18px 4px rgba(233,178,60,0.7); }
+}
+@keyframes spark {
+  0%, 100% { transform: scale(0.6) rotate(-12deg); opacity: 0.5; }
+  50% { transform: scale(1.25) rotate(14deg); opacity: 1; }
+}
+
+.list { list-style: none; margin: 10px 0 0; padding: 0; }
+.list li { display: flex; align-items: center; gap: 9px; padding: 8px 0; border-bottom: 1px dashed var(--rule); font-size: 14px; }
+.list li:last-child { border-bottom: 0; }
+.place { font-size: 17px; width: 22px; text-align: center; }
+.when { margin-left: auto; color: var(--mist); font-size: 12px; }
+.you { color: var(--gold); font-weight: 600; }
+.h { font-family: 'Archivo Black', sans-serif; font-size: 15px; margin: 0; }
+
+.swatches { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 14px; }
+.swatch { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; padding: 0; border: 2px solid transparent; box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2); }
+.swatch[aria-pressed="true"] { border-color: var(--paper); transform: scale(1.06); }
+
+.winbar {
+  background: linear-gradient(100deg, var(--gold) 0%, #F2D06B 100%);
+  color: #22150A; border-radius: 14px; padding: 16px 18px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.winbar .trophy { font-size: 38px; line-height: 1; }
+.winbar h2 { font-family: 'Archivo Black', sans-serif; margin: 0 0 2px; font-size: 20px; }
+.winbar p { margin: 0; font-size: 14px; }
+@media (prefers-reduced-motion: no-preference) { .winbar { animation: pop 420ms cubic-bezier(.2,.9,.3,1.2); } }
+@keyframes pop { from { transform: scale(0.94); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* celebration */
+.party {
+  position: fixed; inset: 0; z-index: 60; cursor: pointer;
+  background: radial-gradient(ellipse at 50% 46%, rgba(7,22,29,0.52) 0%, rgba(7,22,29,0.9) 72%);
+}
+.party canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.party-mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 20px; }
+.huge { display: flex; gap: clamp(2px, 1vw, 10px); }
+.huge b {
+  font-family: 'Archivo Black', 'Arial Black', sans-serif;
+  font-size: clamp(52px, 17vw, 168px); line-height: 0.9; color: var(--gold);
+  text-shadow: 0 6px 0 var(--gold-deep), 0 10px 26px rgba(0,0,0,0.55);
+  transform: scale(0); animation: slam 620ms cubic-bezier(.18,1.5,.4,1) forwards;
+}
+.huge b:nth-child(2) { animation-delay: 100ms; color: #F2D06B; }
+.huge b:nth-child(3) { animation-delay: 200ms; color: var(--rose); text-shadow: 0 6px 0 #A83527, 0 10px 26px rgba(0,0,0,0.55); }
+.huge b:nth-child(4) { animation-delay: 300ms; color: #F2D06B; }
+.huge b:nth-child(5) { animation-delay: 400ms; }
+@keyframes slam {
+  0% { transform: scale(2.6) rotate(-8deg); opacity: 0; }
+  70% { transform: scale(0.92) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.plate {
+  background: rgba(6,20,27,0.74); border: 1px solid rgba(233,178,60,0.4); border-radius: 18px;
+  padding: 14px 26px 16px; max-width: min(92vw, 640px); display: flex; flex-direction: column; gap: 6px;
+}
+.party-line {
+  font-family: 'Archivo Black', sans-serif; font-size: clamp(22px, 6.4vw, 44px);
+  color: #FFF8E7; line-height: 1.1; letter-spacing: -0.01em;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.6), 0 0 26px rgba(0,0,0,0.95);
+  opacity: 0; animation: rise 500ms ease-out 620ms forwards;
+}
+.party-sub {
+  font-size: clamp(15px, 3.6vw, 20px); color: #FFD87A; font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.95); opacity: 0; animation: rise 500ms ease-out 820ms forwards;
+}
+.party-hint { color: #CBE0EA; font-size: 13px; text-shadow: 0 2px 10px rgba(0,0,0,0.9); opacity: 0; animation: rise 500ms ease-out 1100ms forwards; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .huge b, .party-line, .party-sub, .party-hint { animation: none; opacity: 1; transform: none; }
+  .cell.win.sparkle, .cell .spark { animation: none; }
+}
+
+/* other players' wins */
+.burst { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 54; }
+.toasts { position: fixed; top: 14px; right: 14px; left: 14px; z-index: 55; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: none; }
+@media (max-width: 560px) { .toasts { align-items: stretch; } }
+.toast {
+  background: rgba(9,28,36,0.95); border: 1px solid var(--gold); border-radius: 12px;
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.45); max-width: 340px;
+  animation: slide 320ms cubic-bezier(.2,.9,.3,1.1);
+}
+.toast .toast-face { font-size: 24px; }
+.toast b { font-family: 'Archivo Black', sans-serif; font-size: 14px; display: block; }
+.toast small { color: var(--mist); font-size: 12px; }
+@keyframes slide { from { opacity: 0; transform: translateX(24px) scale(0.94); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .toast { animation: none; } }
+
+/* screenshot */
+.shot { position: fixed; inset: 0; z-index: 50; background: rgba(6,20,26,0.82); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.shot-inner { background: var(--ink-2); border: 1px solid var(--rule); border-radius: 14px; padding: 16px; max-width: 460px; width: 100%; }
+.shot img { width: 100%; border-radius: 10px; display: block; margin-bottom: 12px; }
+
+.foot {
+  margin: 34px auto 0; max-width: 52ch; text-align: center; color: #6E93A4;
+  font-size: 12px; line-height: 1.6; border-top: 1px solid var(--rule); padding-top: 14px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="marquee" aria-label="Bingo"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div>
+  <p class="sub">The staff meeting edition</p>
+  <div id="screen"></div>
+  <p class="foot">
+    Disclaimer: this link was shared with tender degenerates only. If it escapes the group,
+    tell the owner right away so it can be nuked.
+  </p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, set, update, onValue, off } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB7AxV2Oc2G4cv6IqFBVYdmTcehIvOECIg",
+  authDomain: "meeting-bingo-cbb54.firebaseapp.com",
+  databaseURL: "https://meeting-bingo-cbb54-default-rtdb.firebaseio.com",
+  projectId: "meeting-bingo-cbb54",
+  storageBucket: "meeting-bingo-cbb54.firebasestorage.app",
+  messagingSenderId: "385671064397",
+  appId: "1:385671064397:web:7ce7bd2fe43ff74f0ce504"
+};
+const db = getDatabase(initializeApp(firebaseConfig));
+
+/* ---------------- content ---------------- */
+
+const ITEMS = [
+  "Mentions Dara",
+  "Ali name drops",
+  "Talking while muted",
+  "At my last job",
+  "Mentions Scott",
+  "Chalmers nonsense ramble",
+  "People share updates simultaneously",
+  "Sara L says something great",
+  "One of us giggles or stifles a laugh",
+  "Jokes in the group chat",
+  "Alternative Spring Break",
+  "Food Pantry",
+  "No updates",
+  "Awkward small talk",
+  "Popcorn reading of slides",
+  "Ali throws shade at Manny",
+  "Chalmers follows up Luis for no reason",
+  "Typo on PowerPoint",
+  "Luis talks a whole lot of nothing",
+  "Ridiculous weekend asks",
+  "Curtis says TBD",
+  "Sorry I didn\u2019t book an in-person room",
+  "One laptop mic to prevent echo",
+  "I'll follow up in an email",
+  "Gia slays career dev update",
+  "Awkward silence",
+  "Eileen clarifies updates",
+  "Latecomer",
+  "Jokes in the meeting chat",
+  "Internet at MHC is acting up",
+  "Funding complaints",
+];
+const FREE = "Free space";
+
+const PLACEHOLDERS = [
+  "Still On Mute", "Camera Off Carl", "Barely Awake Bear", "Second Monitor Sam",
+  "Nodding Politely", "Wifi Ghost", "Snack Break Betty", "Definitely Awake",
+  "Sorry Go Ahead", "Chat Lurker", "Agenda Enjoyer", "Muted Menace",
+];
+
+const AVATARS = ["🐻","🦊","🐸","🐙","🐧","🦉","🐢","🦖","🐝","🌵","🍄","👻","🐳","🦄","🧋","⭐"];
+
+const HYPE = [
+  "SLAY!!", "You ate that up", "You ate and left no crumbs", "Understood the assignment",
+  "It's giving winner", "No notes. None.", "Absolutely cooked", "Main character energy",
+  "Certified bingo behavior", "Ate. Devoured. Consumed.", "That's the one",
+  "Unmatched meeting awareness", "You did that", "Standing ovation in the group chat",
+];
+
+const DAUBERS = [
+  { id: "gold", label: "Gold", light: "#F0C25C", deep: "#C4841B" },
+  { id: "rose", label: "Rose", light: "#F08A7E", deep: "#C93F31" },
+  { id: "grape", label: "Grape", light: "#B58BE0", deep: "#6E3FAF" },
+  { id: "lagoon", label: "Lagoon", light: "#6FD0D6", deep: "#1B8C97" },
+  { id: "lime", label: "Lime", light: "#BEDD73", deep: "#6E9424" },
+  { id: "ink", label: "Ink", light: "#7C93A3", deep: "#28414F" },
+];
+
+const PARTY_COLORS = ["#E9B23C","#F2D06B","#E2685B","#6FD0D6","#B58BE0","#BEDD73","#FBF6E9"];
+
+/* ---------------- patterns ---------------- */
+
+const ROWS = [0,1,2,3,4].map(r => [0,1,2,3,4].map(c => r*5+c));
+const COLS = [0,1,2,3,4].map(c => [0,1,2,3,4].map(r => r*5+c));
+const DIAGS = [[0,6,12,18,24],[4,8,12,16,20]];
+const CORNERS = [[0,4,20,24]];
+const ALL = [Array.from({length:25},(_,i)=>i)];
+
+const PATTERNS = {
+  line:     { label: "Any line",          hint: "Row, column or diagonal",                    sets: [...ROWS, ...COLS, ...DIAGS] },
+  straight: { label: "Rows and columns",  hint: "Diagonals don't count",                      sets: [...ROWS, ...COLS] },
+  diagonal: { label: "Diagonals only",    hint: "Corner to corner, through the free space",   sets: DIAGS },
+  corners:  { label: "Four corners",      hint: "The four corner squares",                    sets: CORNERS },
+  blackout: { label: "Blackout",          hint: "Every square on the card",                   sets: ALL },
+};
+
+const patt = k => PATTERNS[k] || PATTERNS.line;
+const hasWin = (marks, p) => patt(p).sets.some(set => set.every(i => marks[i]));
+const winningCells = (marks, p) => {
+  const set = patt(p).sets.find(s => s.every(i => marks[i]));
+  return set ? new Set(set) : new Set();
+};
+
+/* ---------------- helpers ---------------- */
+
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const el = (tag, cls, text) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+};
+const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const newCode = () => Array.from({length:4}, () => CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]).join("");
+const slug = s => (s.trim().replace(/\s+/g,"_").replace(/[^A-Za-z0-9_]/g,"").slice(0,18) || "Player");
+const ordinal = n => {
+  const s = ["th","st","nd","rd"], v = n % 100;
+  return n + (s[(v-20)%10] || s[v] || s[0]);
+};
+const medal = n => (n === 1 ? "🏆" : n === 2 ? "🥈" : n === 3 ? "🥉" : "•");
+
+function makeCard() {
+  const pool = [...ITEMS];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const picks = pool.slice(0, 24);
+  return [...picks.slice(0,12), FREE, ...picks.slice(12)];
+}
+const freshMarks = () => { const m = Array(25).fill(false); m[12] = true; return m; };
+
+/* ---------------- state ---------------- */
+
+const S = {
+  screen: "home",
+  name: "",
+  avatar: Math.floor(Math.random() * AVATARS.length),
+  dauber: DAUBERS[0],
+  ph: Math.floor(Math.random() * PLACEHOLDERS.length),
+  pattern: "line",
+  code: "",
+  room: null,
+  board: { round: 1, card: makeCard(), marks: freshMarks() },
+  winners: [],
+  seenWins: null,
+  reported: false,
+  party: false,
+  hype: HYPE[0],
+  roomRef: null,
+};
+
+const me = () => slug(S.name);
+const screenEl = document.getElementById("screen");
+const players = () => {
+  const p = (S.room && S.room.players) || {};
+  return Object.entries(p)
+    .map(([tag, v]) => ({ tag, name: v.name || tag, av: v.av, joined: v.joined || 0 }))
+    .sort((a,b) => a.joined - b.joined);
+};
+const nameOf = tag => {
+  const p = players().find(x => x.tag === tag);
+  return p ? p.name : tag.replace(/_/g," ");
+};
+const faceOf = tag => {
+  const p = players().find(x => x.tag === tag);
+  return p && AVATARS[p.av] ? AVATARS[p.av] : "🙂";
+};
+const myPlace = () => S.winners.findIndex(w => w.tag === me()) + 1;
+
+/* ---------------- home screen ---------------- */
+
+function renderHome() {
+  S.screen = "home";
+  screenEl.innerHTML = "";
+  const home = el("div", "home");
+  const panel = el("div", "panel");
+
+  panel.appendChild(el("p", "lede",
+    "Everyone gets a unique card from the same " + ITEMS.length + " squares. Tap squares as they happen. " +
+    "First to complete the pattern wins the trophy."));
+
+  const nameField = el("label", "field");
+  nameField.appendChild(el("span", null, "Your name"));
+  const nameInput = el("input");
+  nameInput.maxLength = 18;
+  nameInput.value = S.name;
+  nameInput.placeholder = PLACEHOLDERS[S.ph];
+  nameInput.addEventListener("input", e => { S.name = e.target.value.slice(0,18); });
+  nameInput.addEventListener("keydown", e => {
+    if (e.key === "Tab" && !e.shiftKey && !nameInput.value) {
+      e.preventDefault();
+      nameInput.value = PLACEHOLDERS[S.ph].slice(0,18);
+      S.name = nameInput.value;
+    }
+    if (e.key === "Enter") startGame();
+  });
+  nameField.appendChild(nameInput);
+  panel.appendChild(nameField);
+
+  const faceField = el("div", "field");
+  faceField.appendChild(el("span", null, "Pick your face"));
+  const faces = el("div", "faces");
+  AVATARS.forEach((a, i) => {
+    const b = el("button", "face", a);
+    b.setAttribute("aria-pressed", String(i === S.avatar));
+    b.setAttribute("aria-label", "Avatar " + (i+1));
+    b.addEventListener("click", () => {
+      S.avatar = i;
+      [...faces.children].forEach((c, k) => c.setAttribute("aria-pressed", String(k === i)));
+    });
+    faces.appendChild(b);
+  });
+  faceField.appendChild(faces);
+  panel.appendChild(faceField);
+
+  const patField = el("label", "field");
+  patField.appendChild(el("span", null, "Winning pattern"));
+  const sel = el("select");
+  Object.entries(PATTERNS).forEach(([k, v]) => {
+    const o = el("option", null, v.label + " — " + v.hint);
+    o.value = k;
+    if (k === S.pattern) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.addEventListener("change", e => { S.pattern = e.target.value; });
+  patField.appendChild(sel);
+  panel.appendChild(patField);
+
+  const startBtn = el("button", "btn", "Start a new game");
+  startBtn.addEventListener("click", startGame);
+  panel.appendChild(startBtn);
+
+  panel.appendChild(el("div", "divider", "or join one"));
+
+  const codeField = el("label", "field");
+  codeField.appendChild(el("span", null, "Room code"));
+  const codeInput = el("input", "code-input");
+  codeInput.maxLength = 4;
+  codeInput.placeholder = "7QK2";
+  codeInput.addEventListener("input", e => { e.target.value = e.target.value.toUpperCase().slice(0,4); });
+  codeInput.addEventListener("keydown", e => { if (e.key === "Enter") joinGame(codeInput.value); });
+  codeField.appendChild(codeInput);
+  panel.appendChild(codeField);
+
+  const joinBtn = el("button", "btn btn-quiet", "Join room");
+  joinBtn.addEventListener("click", () => joinGame(codeInput.value));
+  panel.appendChild(joinBtn);
+
+  const err = el("p", "error");
+  err.id = "err";
+  err.style.display = "none";
+  panel.appendChild(err);
+
+  home.appendChild(panel);
+  screenEl.appendChild(home);
+  setTimeout(() => nameInput.focus(), 60);
+}
+
+const showErr = msg => {
+  const e = document.getElementById("err");
+  if (!e) return;
+  e.textContent = msg;
+  e.style.display = msg ? "block" : "none";
+};
+
+/* ---------------- room actions ---------------- */
+
+async function startGame() {
+  if (!S.name.trim()) return showErr("Add your name first.");
+  showErr("");
+  const code = newCode();
+  const tag = me();
+  try {
+    await set(ref(db, "bingo/rooms/" + code), {
+      host: tag,
+      pattern: S.pattern,
+      round: 1,
+      created: Date.now(),
+      players: { [tag]: { name: S.name.trim(), av: S.avatar, joined: Date.now() } },
+    });
+  } catch (e) {
+    return showErr("Couldn't reach the server. Check your connection and try again.");
+  }
+  enterRoom(code, 1);
+}
+
+async function joinGame(raw) {
+  const code = (raw || "").trim().toUpperCase();
+  if (!S.name.trim()) return showErr("Add your name first.");
+  if (code.length < 4) return showErr("Enter the 4-character room code.");
+  showErr("");
+  let snap;
+  try {
+    snap = await get(ref(db, "bingo/rooms/" + code));
+  } catch (e) {
+    return showErr("Couldn't reach the server. Check your connection and try again.");
+  }
+  if (!snap.exists()) return showErr("No room called " + code + ". Check the code with whoever started the game.");
+  const room = snap.val();
+  await set(ref(db, "bingo/rooms/" + code + "/players/" + me()), {
+    name: S.name.trim(), av: S.avatar, joined: Date.now(),
+  });
+  enterRoom(code, room.round || 1);
+}
+
+function enterRoom(code, round) {
+  S.code = code;
+  S.screen = "game";
+  S.seenWins = null;
+  S.reported = false;
+  S.party = false;
+  S.board = { round, card: makeCard(), marks: freshMarks() };
+  buildGame();
+  S.roomRef = ref(db, "bingo/rooms/" + code);
+  onValue(S.roomRef, snap => applyRoom(snap.val()));
+}
+
+function leaveRoom() {
+  if (S.roomRef) off(S.roomRef);
+  S.roomRef = null;
+  S.room = null;
+  S.code = "";
+  closeParty();
+  document.querySelectorAll(".toasts, .burst, .shot").forEach(n => n.remove());
+  renderHome();
+}
+
+function applyRoom(room) {
+  if (!room) { leaveRoom(); return showErr("That room was removed."); }
+  S.room = room;
+
+  if ((room.round || 1) !== S.board.round) {
+    S.board = { round: room.round || 1, card: makeCard(), marks: freshMarks() };
+    S.reported = false;
+    S.seenWins = new Set();
+    closeParty();
+    document.querySelectorAll(".toasts").forEach(n => n.remove());
+    paintCells();
+  }
+
+  const winObj = (room.wins && room.wins["r" + (room.round || 1)]) || {};
+  const sorted = Object.entries(winObj)
+    .map(([tag, ts]) => ({ tag, ts: Number(ts) || 0 }))
+    .sort((a,b) => a.ts - b.ts);
+  S.winners = sorted;
+
+  if (S.seenWins === null) {
+    S.seenWins = new Set(sorted.map(w => w.tag));
+  } else {
+    const fresh = sorted.filter(w => !S.seenWins.has(w.tag) && w.tag !== me());
+    sorted.forEach(w => S.seenWins.add(w.tag));
+    fresh.forEach(w => announce(w.tag, sorted.findIndex(x => x.tag === w.tag) + 1));
+  }
+  if (sorted.some(w => w.tag === me())) S.reported = true;
+
+  paintChrome();
+  checkWin();
+}
+
+async function changePattern(p) {
+  await update(ref(db, "bingo/rooms/" + S.code), { pattern: p });
+}
+async function nextRound() {
+  await update(ref(db, "bingo/rooms/" + S.code), { round: (S.room.round || 1) + 1 });
+}
+
+/* ---------------- game screen ---------------- */
+
+function buildGame() {
+  screenEl.innerHTML = "";
+
+  const bar = el("div", "bar");
+  const left = el("div", "roomcode");
+  left.appendChild(el("span", "quiet", "Room"));
+  const codeB = el("b", null, S.code);
+  left.appendChild(codeB);
+  const copyBtn = el("button", "btn btn-quiet", "Copy code");
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(S.code);
+      copyBtn.textContent = "Copied";
+      setTimeout(() => (copyBtn.textContent = "Copy code"), 1600);
+    } catch (e) { /* clipboard blocked */ }
+  });
+  left.appendChild(copyBtn);
+  bar.appendChild(left);
+
+  const right = el("div", "row");
+  const roundTag = el("span", "tag", "Round 1"); roundTag.id = "roundTag";
+  const patTag = el("span", "tag", "Any line"); patTag.id = "patTag";
+  const leaveBtn = el("button", "btn btn-quiet", "Leave");
+  leaveBtn.addEventListener("click", leaveRoom);
+  right.append(roundTag, patTag, leaveBtn);
+  bar.appendChild(right);
+  screenEl.appendChild(bar);
+
+  const winSlot = el("div"); winSlot.id = "winSlot";
+  screenEl.appendChild(winSlot);
+
+  const grid2 = el("div", "grid-2");
+
+  const cardBox = el("div", "card");
+  const head = el("div", "head");
+  "BINGO".split("").forEach(ch => head.appendChild(el("span", null, ch)));
+  head.setAttribute("aria-hidden", "true");
+  cardBox.appendChild(head);
+  const grid = el("div", "grid"); grid.id = "grid";
+  for (let i = 0; i < 25; i++) {
+    const b = el("button", "cell");
+    b.dataset.i = String(i);
+    b.appendChild(el("span", "label", ""));
+    b.addEventListener("click", () => toggle(i));
+    grid.appendChild(b);
+  }
+  cardBox.appendChild(grid);
+  grid2.appendChild(cardBox);
+
+  const side = el("div");
+
+  const winPanel = el("div", "panel");
+  winPanel.appendChild(el("h3", "h", "Winners"));
+  const winBody = el("div"); winBody.id = "winBody";
+  winPanel.appendChild(winBody);
+  side.appendChild(winPanel);
+
+  const roster = el("div", "panel");
+  roster.appendChild(el("h3", "h", "In the room"));
+  const rosterBody = el("div"); rosterBody.id = "rosterBody";
+  roster.appendChild(rosterBody);
+  side.appendChild(roster);
+
+  const marker = el("div", "panel");
+  marker.appendChild(el("h3", "h", "Your marker"));
+  const swatches = el("div", "swatches");
+  DAUBERS.forEach(d => {
+    const b = el("button", "swatch");
+    b.style.background = "radial-gradient(circle at 34% 30%, " + d.light + ", " + d.deep + ")";
+    b.title = d.label;
+    b.setAttribute("aria-label", d.label);
+    b.setAttribute("aria-pressed", String(d.id === S.dauber.id));
+    b.addEventListener("click", () => {
+      S.dauber = d;
+      document.documentElement.style.setProperty("--dauber-1", d.light);
+      document.documentElement.style.setProperty("--dauber-2", d.deep);
+      [...swatches.children].forEach((c, k) => c.setAttribute("aria-pressed", String(DAUBERS[k].id === d.id)));
+    });
+    swatches.appendChild(b);
+  });
+  marker.appendChild(swatches);
+  const shotBtn = el("button", "btn btn-quiet", "Save a picture of my card");
+  shotBtn.addEventListener("click", makeShot);
+  marker.appendChild(shotBtn);
+  side.appendChild(marker);
+
+  const hostPanel = el("div", "panel"); hostPanel.id = "hostPanel"; hostPanel.style.display = "none";
+  hostPanel.appendChild(el("h3", "h", "Host controls"));
+  const hostField = el("label", "field");
+  hostField.style.marginTop = "10px";
+  hostField.appendChild(el("span", null, "Winning pattern"));
+  const hostSel = el("select"); hostSel.id = "hostSel";
+  Object.entries(PATTERNS).forEach(([k, v]) => {
+    const o = el("option", null, v.label); o.value = k; hostSel.appendChild(o);
+  });
+  hostSel.addEventListener("change", e => changePattern(e.target.value));
+  hostField.appendChild(hostSel);
+  hostPanel.appendChild(hostField);
+  const roundBtn = el("button", "btn", "Deal a new round");
+  roundBtn.addEventListener("click", nextRound);
+  hostPanel.appendChild(roundBtn);
+  hostPanel.appendChild(el("p", "empty", "A new round gives everyone a fresh card and clears the trophies."));
+  side.appendChild(hostPanel);
+
+  grid2.appendChild(side);
+  screenEl.appendChild(grid2);
+
+  paintCells();
+}
+
+function toggle(i) {
+  if (i === 12) return;
+  S.board.marks[i] = !S.board.marks[i];
+  paintCells();
+  checkWin();
+}
+
+function paintCells() {
+  const grid = document.getElementById("grid");
+  if (!grid) return;
+  const p = S.room ? S.room.pattern : "line";
+  const iWon = hasWin(S.board.marks, p);
+  const wset = iWon ? winningCells(S.board.marks, p) : new Set();
+  [...grid.children].forEach((cell, i) => {
+    cell.querySelector(".label").textContent = S.board.card[i];
+    cell.classList.toggle("marked", !!S.board.marks[i]);
+    cell.classList.toggle("free", i === 12);
+    cell.classList.toggle("win", wset.has(i));
+    cell.classList.toggle("sparkle", S.party && wset.has(i));
+    const spark = cell.querySelector(".spark");
+    if (S.party && wset.has(i)) {
+      if (!spark) { const s = el("span", "spark", "✨"); cell.appendChild(s); }
+    } else if (spark) spark.remove();
+    cell.setAttribute("aria-pressed", String(!!S.board.marks[i]));
+  });
+}
+
+function paintChrome() {
+  const room = S.room;
+  if (!room) return;
+  const roundTag = document.getElementById("roundTag");
+  const patTag = document.getElementById("patTag");
+  if (roundTag) roundTag.textContent = "Round " + (room.round || 1);
+  if (patTag) patTag.textContent = patt(room.pattern).label;
+
+  const winBody = document.getElementById("winBody");
+  if (winBody) {
+    winBody.innerHTML = "";
+    if (!S.winners.length) {
+      winBody.appendChild(el("p", "empty", "Nobody yet. " + patt(room.pattern).hint.toLowerCase() + "."));
+    } else {
+      const ol = el("ol", "list");
+      S.winners.forEach((w, i) => {
+        const li = el("li");
+        li.appendChild(el("span", "place", medal(i+1)));
+        li.appendChild(el("span", "avatar", faceOf(w.tag)));
+        li.appendChild(el("span", w.tag === me() ? "you" : null, nameOf(w.tag)));
+        li.appendChild(el("span", "when", ordinal(i+1)));
+        ol.appendChild(li);
+      });
+      winBody.appendChild(ol);
+    }
+  }
+
+  const rosterBody = document.getElementById("rosterBody");
+  if (rosterBody) {
+    rosterBody.innerHTML = "";
+    const list = players();
+    if (!list.length) {
+      rosterBody.appendChild(el("p", "empty", "Share the code " + S.code + " to fill the room."));
+    } else {
+      const ul = el("ul", "list");
+      list.forEach(p => {
+        const li = el("li");
+        li.appendChild(el("span", "avatar", AVATARS[p.av] || "🙂"));
+        li.appendChild(el("span", p.tag === me() ? "you" : null, p.name));
+        if (room.host === p.tag) li.appendChild(el("span", "when", "host"));
+        ul.appendChild(li);
+      });
+      rosterBody.appendChild(ul);
+    }
+  }
+
+  const hostPanel = document.getElementById("hostPanel");
+  if (hostPanel) {
+    const isHost = room.host === me();
+    hostPanel.style.display = isHost ? "block" : "none";
+    const hostSel = document.getElementById("hostSel");
+    if (hostSel) hostSel.value = room.pattern || "line";
+  }
+
+  const slot = document.getElementById("winSlot");
+  const place = myPlace();
+  if (slot) {
+    slot.innerHTML = "";
+    if (place > 0) {
+      const bar = el("div", "winbar");
+      bar.appendChild(el("div", "trophy", place === 1 ? "🏆" : medal(place)));
+      const txt = el("div");
+      txt.appendChild(el("h2", null, "Bingo, " + (S.name.trim() || nameOf(me()))));
+      txt.appendChild(el("p", null, place === 1
+        ? "First card home this round. Try to look normal."
+        : "You finished " + ordinal(place) + " this round."));
+      bar.appendChild(txt);
+      const replay = el("button", "btn btn-quiet", "Replay");
+      replay.style.marginLeft = "auto";
+      replay.style.color = "#22150A";
+      replay.style.borderColor = "#B98E2B";
+      replay.addEventListener("click", () => openParty());
+      bar.appendChild(replay);
+      slot.appendChild(bar);
+    }
+  }
+
+  const sub = document.querySelector(".party-sub");
+  if (sub && place > 0) {
+    sub.textContent = AVATARS[S.avatar] + " " + (S.name.trim() || nameOf(me())) + " takes " + ordinal(place) + " place";
+    sub.style.visibility = "visible";
+  }
+  paintCells();
+}
+
+function checkWin() {
+  const room = S.room;
+  if (!room || S.reported) return;
+  if (S.board.round !== (room.round || 1)) return;
+  if (!hasWin(S.board.marks, room.pattern)) return;
+  S.reported = true;
+  S.hype = pick(HYPE);
+  openParty();
+  set(ref(db, "bingo/rooms/" + S.code + "/wins/r" + (room.round || 1) + "/" + me()), Date.now());
+}
+
+/* ---------------- celebration ---------------- */
+
+let partyRaf = 0, partyTimer = 0;
+
+function openParty() {
+  closeParty();
+  S.party = true;
+  const layer = el("div", "party");
+  const canvas = el("canvas");
+  layer.appendChild(canvas);
+  const mid = el("div", "party-mid");
+  const huge = el("div", "huge");
+  "BINGO".split("").forEach(ch => huge.appendChild(el("b", null, ch)));
+  mid.appendChild(huge);
+  const plate = el("div", "plate");
+  plate.appendChild(el("div", "party-line", S.hype));
+  const place = myPlace();
+  const sub = el("div", "party-sub", place > 0
+    ? AVATARS[S.avatar] + " " + (S.name.trim() || nameOf(me())) + " takes " + ordinal(place) + " place"
+    : "\u00A0");
+  if (place <= 0) sub.style.visibility = "hidden";
+  plate.appendChild(sub);
+  mid.appendChild(plate);
+  mid.appendChild(el("div", "party-hint", "Tap anywhere to get back to pretending you're listening"));
+  layer.appendChild(mid);
+  layer.addEventListener("click", closeParty);
+  document.body.appendChild(layer);
+  paintCells();
+  runFireworks(canvas);
+  partyTimer = setTimeout(closeParty, 9000);
+}
+
+function closeParty() {
+  S.party = false;
+  clearTimeout(partyTimer);
+  cancelAnimationFrame(partyRaf);
+  document.querySelectorAll(".party").forEach(n => n.remove());
+  paintCells();
+}
+
+const reduced = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function runFireworks(canvas) {
+  if (reduced()) return;
+  const ctx = canvas.getContext("2d");
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let w = 0, h = 0;
+  const resize = () => {
+    w = canvas.clientWidth; h = canvas.clientHeight;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  resize();
+  window.addEventListener("resize", resize);
+
+  const bits = [];
+  const confetti = n => {
+    for (let i = 0; i < n; i++) bits.push({
+      kind: "c", x: Math.random()*w, y: -30 - Math.random()*h*0.8,
+      vx: (Math.random()-0.5)*1.4, vy: 1.7 + Math.random()*2.6,
+      w: 6 + Math.random()*7, h: 9 + Math.random()*9,
+      rot: Math.random()*Math.PI, vr: (Math.random()-0.5)*0.3,
+      sway: Math.random()*Math.PI*2, color: pick(PARTY_COLORS),
+    });
+  };
+  const firework = (x, y) => {
+    const color = pick(PARTY_COLORS);
+    const count = 44 + Math.floor(Math.random()*22);
+    for (let i = 0; i < count; i++) {
+      const a = (Math.PI*2*i)/count + Math.random()*0.12;
+      const sp = 1.8 + Math.random()*4.2;
+      bits.push({ kind: "f", x, y, px: x, py: y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
+        life: 1, decay: 0.011 + Math.random()*0.013,
+        color: Math.random() < 0.25 ? pick(PARTY_COLORS) : color });
+    }
+    bits.push({ kind: "flash", x, y, life: 1, color });
+  };
+  const sparkle = () => bits.push({
+    kind: "s", x: Math.random()*w, y: Math.random()*h, life: 1,
+    decay: 0.02 + Math.random()*0.02, size: 5 + Math.random()*12,
+    color: Math.random() < 0.6 ? "#FBF6E9" : pick(PARTY_COLORS),
+  });
+
+  confetti(170);
+  firework(w*0.3, h*0.32);
+  firework(w*0.72, h*0.24);
+
+  let last = performance.now(), elapsed = 0;
+  const frame = now => {
+    const dt = Math.min(2.4, (now - last)/16.67);
+    last = now; elapsed += dt;
+    ctx.clearRect(0, 0, w, h);
+
+    if (elapsed < 420) {
+      if (Math.random() < 0.05*dt) firework(w*(0.12+Math.random()*0.76), h*(0.1+Math.random()*0.42));
+      if (Math.random() < 0.5*dt) sparkle();
+      if (Math.random() < 0.06*dt) confetti(14);
+    }
+
+    for (let i = bits.length - 1; i >= 0; i--) {
+      const b = bits[i];
+      if (b.kind === "c") {
+        b.sway += 0.06*dt;
+        b.x += (b.vx + Math.sin(b.sway)*0.9)*dt;
+        b.y += b.vy*dt; b.rot += b.vr*dt;
+        ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.rot);
+        ctx.fillStyle = b.color; ctx.globalAlpha = 0.95;
+        ctx.fillRect(-b.w/2, -b.h/2, b.w, b.h*(0.4 + Math.abs(Math.cos(b.sway))*0.6));
+        ctx.restore();
+        if (b.y > h + 40) bits.splice(i, 1);
+        continue;
+      }
+      if (b.kind === "f") {
+        b.px = b.x; b.py = b.y;
+        b.x += b.vx*dt; b.y += b.vy*dt;
+        b.vy += 0.045*dt; b.vx *= 0.985; b.vy *= 0.985;
+        b.life -= b.decay*dt;
+        if (b.life <= 0) { bits.splice(i, 1); continue; }
+        ctx.globalAlpha = Math.max(0, b.life);
+        ctx.strokeStyle = b.color; ctx.lineWidth = 2.4*b.life + 0.6; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(b.px, b.py); ctx.lineTo(b.x, b.y); ctx.stroke();
+        continue;
+      }
+      if (b.kind === "flash") {
+        b.life -= 0.06*dt;
+        if (b.life <= 0) { bits.splice(i, 1); continue; }
+        const r = 90*(1.2 - b.life);
+        const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
+        g.addColorStop(0, b.color); g.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.globalAlpha = b.life*0.5; ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, Math.PI*2); ctx.fill();
+        continue;
+      }
+      b.life -= b.decay*dt;
+      if (b.life <= 0) { bits.splice(i, 1); continue; }
+      const s = b.size*Math.sin(b.life*Math.PI);
+      ctx.globalAlpha = Math.max(0, b.life);
+      ctx.strokeStyle = b.color; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(b.x - s, b.y); ctx.lineTo(b.x + s, b.y);
+      ctx.moveTo(b.x, b.y - s); ctx.lineTo(b.x, b.y + s);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    partyRaf = requestAnimationFrame(frame);
+  };
+  partyRaf = requestAnimationFrame(frame);
+}
+
+/* ---------------- other players' wins ---------------- */
+
+function announce(tag, place) {
+  let box = document.querySelector(".toasts");
+  if (!box) { box = el("div", "toasts"); document.body.appendChild(box); }
+  const t = el("div", "toast");
+  t.appendChild(el("span", "toast-face", faceOf(tag)));
+  const txt = el("span");
+  txt.appendChild(el("b", null, nameOf(tag) + " got bingo"));
+  txt.appendChild(el("small", null, place === 1 ? "🏆 First card home" : medal(place) + " " + ordinal(place) + " place"));
+  t.appendChild(txt);
+  box.appendChild(t);
+  setTimeout(() => { t.remove(); if (box && !box.children.length) box.remove(); }, 5200);
+  burst();
+}
+
+function burst() {
+  if (reduced()) return;
+  document.querySelectorAll(".burst").forEach(n => n.remove());
+  const canvas = el("canvas", "burst");
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext("2d");
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const bits = [];
+  for (let i = 0; i < 70; i++) bits.push({
+    x: Math.random()*w, y: -20 - Math.random()*h*0.4,
+    vx: (Math.random()-0.5)*1.4, vy: 2 + Math.random()*3,
+    w: 5 + Math.random()*6, h: 8 + Math.random()*7,
+    rot: Math.random()*Math.PI, vr: (Math.random()-0.5)*0.3,
+    sway: Math.random()*Math.PI*2, color: pick(PARTY_COLORS),
+  });
+
+  let last = performance.now(), raf = 0;
+  const frame = now => {
+    const dt = Math.min(2.4, (now - last)/16.67);
+    last = now;
+    ctx.clearRect(0, 0, w, h);
+    for (let i = bits.length - 1; i >= 0; i--) {
+      const b = bits[i];
+      b.sway += 0.06*dt;
+      b.x += (b.vx + Math.sin(b.sway)*0.8)*dt;
+      b.y += b.vy*dt; b.rot += b.vr*dt;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.rot);
+      ctx.fillStyle = b.color; ctx.globalAlpha = 0.9;
+      ctx.fillRect(-b.w/2, -b.h/2, b.w, b.h*(0.4 + Math.abs(Math.cos(b.sway))*0.6));
+      ctx.restore();
+      if (b.y > h + 30) bits.splice(i, 1);
+    }
+    ctx.globalAlpha = 1;
+    if (bits.length) raf = requestAnimationFrame(frame);
+    else canvas.remove();
+  };
+  raf = requestAnimationFrame(frame);
+}
+
+/* ---------------- screenshot ---------------- */
+
+function makeShot() {
+  const W = 1080, pad = 46, headTop = 132;
+  const gridW = W - pad*2, cell = gridW/5, foot = 104;
+  const H = headTop + gridW + foot + pad;
+  const canvas = document.createElement("canvas");
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  const display = "'Archivo Black', 'Arial Black', Arial, sans-serif";
+  const body = "'IBM Plex Sans', Arial, sans-serif";
+
+  ctx.fillStyle = "#FBF6E9";
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#0F262F";
+  ctx.font = "74px " + display;
+  "BINGO".split("").forEach((ch, i) => ctx.fillText(ch, pad + cell*i + cell/2, headTop - 32));
+
+  const p = S.room ? S.room.pattern : "line";
+  const wset = hasWin(S.board.marks, p) ? winningCells(S.board.marks, p) : new Set();
+
+  S.board.card.forEach((text, i) => {
+    const cx = pad + (i % 5)*cell, cy = headTop + Math.floor(i/5)*cell, inset = 4;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(cx+inset, cy+inset, cell-inset*2, cell-inset*2, 14);
+    else ctx.rect(cx+inset, cy+inset, cell-inset*2, cell-inset*2);
+    ctx.closePath();
+    ctx.fillStyle = i === 12 ? "#F6ECCF" : "#FFFDF6";
+    ctx.fill();
+    ctx.strokeStyle = wset.has(i) ? "#E2685B" : "#D9CFB4";
+    ctx.lineWidth = wset.has(i) ? 5 : 2;
+    ctx.stroke();
+
+    if (S.board.marks[i]) {
+      const g = ctx.createRadialGradient(cx + cell*0.38, cy + cell*0.36, cell*0.05, cx + cell/2, cy + cell/2, cell*0.42);
+      g.addColorStop(0, S.dauber.light);
+      g.addColorStop(1, S.dauber.deep);
+      ctx.globalAlpha = 0.55;
+      ctx.beginPath(); ctx.arc(cx + cell/2, cy + cell/2, cell*0.4, 0, Math.PI*2);
+      ctx.fillStyle = g; ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    let size = 22, lines = [];
+    for (; size >= 13; size--) {
+      ctx.font = (S.board.marks[i] ? 600 : 400) + " " + size + "px " + body;
+      lines = [];
+      let line = "";
+      text.split(" ").forEach(word => {
+        const test = line ? line + " " + word : word;
+        if (ctx.measureText(test).width > cell - 26 && line) { lines.push(line); line = word; }
+        else line = test;
+      });
+      if (line) lines.push(line);
+      if (lines.length * (size + 5) <= cell - 26) break;
+    }
+    ctx.fillStyle = "#152A33";
+    const startY = cy + cell/2 - ((lines.length - 1)*(size + 5))/2 + size/3;
+    lines.forEach((l, k) => ctx.fillText(l, cx + cell/2, startY + k*(size + 5)));
+  });
+
+  const place = myPlace();
+  const label = place > 0 ? ordinal(place) + " place" : "still hunting";
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#0F262F";
+  ctx.font = "34px " + display;
+  ctx.fillText(AVATARS[S.avatar] + "  " + (S.name.trim() || "Player"), pad, H - foot + 44);
+  ctx.font = "22px " + body;
+  ctx.fillStyle = "#4E6F7D";
+  ctx.fillText("Room " + S.code + " · Round " + (S.room ? S.room.round || 1 : 1) + " · " + patt(p).label + " · " + label, pad, H - foot + 78);
+  ctx.textAlign = "right";
+  ctx.font = "40px " + body;
+  ctx.fillText(place > 0 ? medal(place) : "🫥", W - pad, H - foot + 66);
+
+  showShot(canvas.toDataURL("image/png"));
+}
+
+function showShot(dataUrl) {
+  document.querySelectorAll(".shot").forEach(n => n.remove());
+  const overlay = el("div", "shot");
+  overlay.addEventListener("click", () => overlay.remove());
+  const inner = el("div", "shot-inner");
+  inner.addEventListener("click", e => e.stopPropagation());
+  const img = el("img");
+  img.src = dataUrl;
+  img.alt = "Your bingo card";
+  inner.appendChild(img);
+  const row = el("div", "row");
+  const a = el("a", "btn", "Download PNG");
+  a.href = dataUrl;
+  a.download = "bingo-" + S.code + "-" + me() + ".png";
+  a.style.textDecoration = "none";
+  const close = el("button", "btn btn-quiet", "Close");
+  close.addEventListener("click", () => overlay.remove());
+  row.append(a, close);
+  inner.appendChild(row);
+  inner.appendChild(el("p", "empty", "On a phone, press and hold the picture to save or share it."));
+  overlay.appendChild(inner);
+  document.body.appendChild(overlay);
+}
+
+/* ---------------- go ---------------- */
+
+renderHome();
+</script>
+</body>
+</html>

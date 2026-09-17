@@ -75,6 +75,17 @@ canvas#game{position:fixed;inset:0;width:100%;height:100%;display:block;touch-ac
 #card .floors button b{font-family:var(--display);font-size:18px;width:26px;text-align:center;color:var(--gold)}
 #card .floors button span{font-size:13px;line-height:1.3}
 #card .floors button small{display:block;color:var(--stone-dim)}
+#webcard{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(760px,94vw);height:min(80vh,620px);
+  display:none;flex-direction:column;padding:14px;gap:8px}
+#webcard.on{display:flex}
+.wc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.wc-head h2{margin:0;font-family:var(--display);font-size:19px;font-weight:700;line-height:1.2}
+.wc-actions{display:flex;gap:8px;flex:none}
+.wc-actions a,.wc-actions button{font-size:12px;padding:6px 10px;border-radius:3px;border:2px solid #0e1016;background:var(--slate-2);color:inherit;text-decoration:none;white-space:nowrap}
+#wcDesc{margin:0;font-size:13px;line-height:1.45;color:var(--stone-dim)}
+.wc-frame{flex:1;min-height:0;border-radius:3px;overflow:hidden;border:2px solid #0e1016;background:#fff}
+.wc-frame iframe{width:100%;height:100%;border:0;display:block}
+@media (max-width:820px){#webcard{width:100vw;height:100vh;top:0;left:0;transform:none;border-radius:0}}
 .btn{background:var(--slate-2);border:2px solid #0e1016;border-radius:3px;padding:8px 14px;font-size:14px}
 .btn.go{background:var(--red);color:#fff;font-family:var(--display);font-size:18px;padding:12px 18px;width:100%}
 .btn.go:hover{background:#d8183a}
@@ -98,6 +109,7 @@ label.f input{background:#12141a;border:2px solid #0e1016;border-radius:3px;padd
 #pickers{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
 .pick{display:flex;align-items:center;gap:8px;font-size:13px}
 .pick span{width:44px;color:var(--stone-dim)}
+.pick.dim{opacity:.35;pointer-events:none}
 .sw{display:flex;gap:4px;flex-wrap:wrap}
 .sw button{width:22px;height:22px;border-radius:3px;border:2px solid #0e1016;padding:0}
 .sw button[aria-pressed=true]{outline:2px solid #fff;outline-offset:1px}
@@ -136,6 +148,11 @@ label.f input{background:#12141a;border:2px solid #0e1016;border-radius:3px;padd
     <div id="emotes" class="panel"></div>
   </div>
   <div id="card" class="panel" role="dialog" aria-modal="true"><h2></h2><p></p><div class="floors"></div><button class="btn" id="cardClose">Close</button></div>
+  <div id="webcard" class="panel" role="dialog" aria-modal="true">
+    <div class="wc-head"><h2></h2><div class="wc-actions"><a id="wcOpen" href="#" target="_blank" rel="noopener">Open in new tab</a><button id="wcClose" type="button">Close</button></div></div>
+    <p id="wcDesc"></p>
+    <div class="wc-frame"><iframe id="wcFrame" title="Macaulay website" src="about:blank" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
+  </div>
 </div>
 
 <div id="join">
@@ -382,12 +399,12 @@ const MAPS = {
     "#.......VVV.......HH..P....#",
     "#E........................S#",
     "#........F.................#",
-    "####D########D##############",
-    "#.....kkk#.....kkk##########",
-    "#........#........##########",
-    "#........#........##########",
-    "#........#........##########",
-    "#.rrrrrr.#.rrrrrr.##########",
+    "####D########D########D#####",
+    "#.....kkk#.....kkk#y.....yv#",
+    "#........#........#.Z.Z.KK.#",
+    "#........#........#vZ.Z..c.#",
+    "#........#........#.Z.Z...y#",
+    "#.rrrrrr.#.rrrrrr.#........#",
     "############################",
     "                            ",
     "                            ",
@@ -406,7 +423,7 @@ const FLOORS = [
   {id:'2', label:'2nd floor',   blurb:'Screening room, classrooms, courtyard'},
   {id:'1', label:'Main floor',  blurb:'Lecture hall, reading room, front desk'},
   {id:'L', label:'Lower level', blurb:'Cabaret and the Commons'},
-  {id:'C', label:'Cellar',      blurb:'Vending machines, restrooms'},
+  {id:'C', label:'Cellar',      blurb:'Vending machines, restrooms, the Bat Cave'},
 ];
 const HALL = {x0:1,y0:14,x1:26,y1:16,mat:'terrazzo'};
 const ROOMS = {
@@ -438,34 +455,57 @@ const ROOMS = {
         {name:'The Commons',x0:1,y0:18,x1:26,y1:24,mat:'oak'} ],
   'C':[ {...HALL,name:'Cellar hall',mat:'concrete'},
         {name:'Restroom',x0:1,y0:18,x1:8,y1:22,mat:'tile'},
-        {name:'Restroom',x0:10,y0:18,x1:17,y1:22,mat:'tile'} ],
+        {name:'Restroom',x0:10,y0:18,x1:17,y1:22,mat:'tile'},
+        {name:'The Bat Cave (IT & server room)',x0:19,y0:18,x1:26,y1:22,mat:'cave'} ],
 };
 const SNACKS = ['Pretzels. The machine thinks about it, then agrees.','Sour gummies. A seminar staple.','It ate your dollar. Classic.','Trail mix, heavy on the raisins.','Seltzer, extremely cold.'];
+const FORM_LINKS = [
+  'https://macaulay.cuny.edu/policies-forms-index/building-use-guidelines/',
+  'https://macaulay.cuny.edu/admissions/applying-to-macaulay/',
+  'https://macaulay.cuny.edu/admissions/tuition-and-merit-scholarship/tuition-information/',
+  'https://macaulay.cuny.edu/venues/macaulay-lecture-hall/',
+  'https://macaulay.cuny.edu/about-macaulay/macaulay-honors-college-building/screening-room/',
+  'https://macaulay.cuny.edu/about-macaulay/macaulay-honors-college-building/',
+  'https://macaulay.cuny.edu/directions/',
+  'https://macaulay.cuny.edu/admissions/friedman-transfer-scholars-program/applying-to-the-friedman-transfer-scholars-program/'
+];
+const randomForm=()=>FORM_LINKS[Math.floor(Math.random()*FORM_LINKS.length)];
 const THINGS = {
   '1':[ {x:22,y:25,title:'Macaulay Center',text:'35 West 67th Street. A Gothic Revival building, dedicated as the home of Macaulay Honors College on April 17, 2008.'},
         {x:16,y:28,title:'West 67th Street',text:'Central Park is half a block east. Lincoln Center is a short walk the other way, and the 1 train stops at 66th Street. The ramp at the west end of the building leads down to the lower level.'},
         {x:13,y:13,title:'Wall of Fame',text:'The Wall of Fame runs along the main hall, right outside the lecture hall.'},
         {x:14,y:4,title:'Lecture hall',text:'The main-floor hall for talks, presentations and banquets. Doors on either side of the screen open onto the terrace.'},
         {x:9,y:5,title:'Podium',text:'You tap the mic. It is on. Everyone is looking at you.'},
-        {x:23,y:20,title:'Front desk',text:'Visitors check in with Public Safety here before heading upstairs.'},
+        {x:23,y:20,title:'Front desk',computer:true,text:'Visitors check in with Public Safety here before heading upstairs. The screen is already open to something on the Macaulay website.'},
         {x:3,y:18,title:'Reading room',text:'Open to students whenever it is not reserved. No booking needed, just find a chair.'} ],
   '2':[ {x:6,y:4,title:'Screening room',text:'High-definition projection and surround sound, with comfortable seats. Pick a row.'},
         {x:21,y:4,title:'Whiteboard',text:'Half-erased notes from a seminar. Someone drew a very good pigeon in the corner.'},
         {x:2,y:1,title:'2nd floor courtyard',text:'Outdoor public space for students whenever it is not booked for an event.'} ],
-  '4':[ {x:6,y:7,title:"Dean's office",text:'A private room. Conversations in here stay in here.'},
+  '4':[ {x:6,y:7,title:"Dean's office",computer:true,text:'A private room. Conversations in here stay in here. A tab is still open on the Macaulay website.'},
         {x:20,y:4,title:'Staff meeting room',text:'Private room for staff meetings. Only people inside can hear the chat.'},
         {x:26,y:21,title:'Water cooler',text:'Where the real decisions get made.'},
-        {x:25,y:18,title:'Filing shelves',text:'Binders, forms, and a box labeled "misc" that nobody has opened in years.'} ],
+        {x:25,y:18,title:'Filing shelves',text:'Binders, forms, and a box labeled "misc" that nobody has opened in years.'},
+        {x:2,y:19,title:'Computer',computer:true,text:'A staff computer. Someone left a Macaulay Honors College page open.'},
+        {x:10,y:19,title:'Computer',computer:true,text:'A staff computer. Someone left a Macaulay Honors College page open.'},
+        {x:16,y:19,title:'Computer',computer:true,text:'A staff computer. Someone left a Macaulay Honors College page open.'},
+        {x:2,y:22,title:'Computer',computer:true,text:'A staff computer. Someone left a Macaulay Honors College page open.'},
+        {x:10,y:22,title:'Computer',computer:true,text:'A staff computer. Someone left a Macaulay Honors College page open.'},
+        {x:20,y:22,title:'Computer',computer:true,text:'A staff computer. Someone left a Macaulay Honors College page open.'} ],
   '3':[ {x:6,y:4,title:'Conference room',text:'This is a private room. Anything said in here is only heard by people inside it.'},
-        {x:6,y:20,title:'Advising',text:'Drop by with questions about requirements, study abroad, or the Opportunities Fund.'} ],
+        {x:6,y:20,title:'Advising',computer:true,text:'Drop by with questions about requirements, study abroad, or the Opportunities Fund. The advisor\'s screen is open to a page on the Macaulay website.'},
+        {x:2,y:20,title:'Computer',computer:true,text:'A staff computer. Someone left a Macaulay Honors College page open.'},
+        {x:10,y:20,title:'Computer',computer:true,text:'A staff computer. Someone left a Macaulay Honors College page open.'} ],
   'L':[ {x:9,y:5,title:'Piano',text:'You play a few bars. It sounds like a jazz club in here.',sound:'piano'},
         {x:13,y:5,title:'Black box stage',text:'Twenty feet by twelve. Concerts, readings, open mics.'},
         {x:22,y:8,title:'The bar',text:'A long bar and banquette seating. The water bottle station is behind it.'},
         {x:26,y:8,title:'Water bottle station',text:'Behind the bar, as advertised. Your bottle is full.'},
+        {x:26,y:10,title:'Box office computer',computer:true,text:'The box office terminal. It wakes up to a page on the Macaulay website.'},
         {x:10,y:18,title:'Cubbies',text:'Prayer mats are kept in the leftmost cubby, under the TV, for anyone who needs them.'} ],
   'C':[ {x:9,y:14,title:'Vending machines',text:()=>SNACKS[Math.floor(Math.random()*SNACKS.length)]},
         {x:9,y:16,title:'Water fountain',text:'Across from the vending machines.'},
-        {x:4,y:17,title:'Restrooms',text:'The accessible bathrooms are on this level. The elevator stops on every floor.'} ],
+        {x:4,y:17,title:'Restrooms',text:'The accessible bathrooms are on this level. The elevator stops on every floor.'},
+        {x:21,y:20,title:'Server room',text:'Racks hum in the dark. Someone taped a little bat silhouette to the door on the way in.'},
+        {x:24,y:19,title:'IT office',computer:true,text:'The Bat Cave, as everyone calls it. IT keeps the building running from down here. The screen wakes to a page on the Macaulay website.'} ],
 };
 const NPCS = [
   {floor:'1',x:24,y:19,name:'Public Safety',look:{s:1,k:3,h:0,y:3},lines:['Welcome to Macaulay. Elevator is straight ahead, at the west end of the hall.','Reading room is on your left. Lecture hall is past the Wall of Fame.','Cabaret is on the lower level. Take the elevator or the ramp outside.']},
@@ -475,6 +515,7 @@ const NPCS = [
   {floor:'4',x:6,y:20,name:'Administrator',look:{s:5,k:2,h:1,y:2},lines:['Welcome to the fourth floor. Admin offices are on both sides of this wall.','The dean is at the back on the left. Staff meetings happen in the room next to it.','Forms go in the tray. The tray is full. Email is fine.']},
   {floor:'3',x:2,y:19,name:'Advisor',look:{s:2,k:2,h:2,y:2},lines:['Have a seat. What are you thinking about for next semester?','The conference room next door is private. Good for meetings.']},
   {floor:'2',x:6,y:6,name:'Film club',look:{s:3,k:0,h:4,y:1},lines:['Screening starts when enough people sit down. That is the rule I just made up.']},
+  {floor:'C',x:23,y:21,name:'IT',look:{s:6,k:3,h:5,y:0},lines:['Welcome to the Bat Cave. Watch the cables.','If the Wi-Fi drops, it is probably a squirrel outside, not us.','Servers stay cold down here. Bring a hoodie if you are staying a while.']},
 ];
 const WANDERER_LINES = ['Heading to seminar.','Is the courtyard open?','Have you seen the Cabaret?','Coffee first.','Which floor is advising on? Third, right.','Nice day to cut through the park.'];
 
@@ -485,7 +526,7 @@ const HAIRS=['#1d1a1b','#4a2f1d','#8a5a2b','#d9b15c','#b33a2a','#8f9299','#3b6fd
 const STYLES=['Short','Long','Bun','Cap','Scarf'];
 const EMOTES=['👋','❤️','😂','🎉','👍'];
 
-const WALLS='#wXWMJt', SOLID=WALLS+'TBKVPFbpuIrk~+fYg ', PORTAL='ESR';
+const WALLS='#wXWMJt', SOLID=WALLS+'TBKVPFbpuIrk~+fYgZ ', PORTAL='ESR';
 const $=s=>document.querySelector(s);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const rnd=(x,y,i=0)=>{const s=Math.sin(x*127.1+y*311.7+i*74.7)*43758.5453;return s-Math.floor(s)};
@@ -514,6 +555,7 @@ function drawMat(c,mat,x,y){
     case 'stone': R(c,X,Y,T,T,(x+y)%2?'#d9d4c7':'#c6c0b0'); R(c,X,Y,T,1,'rgba(0,0,0,.08)'); R(c,X,Y,1,T,'rgba(0,0,0,.08)'); break;
     case 'tile': R(c,X,Y,T,T,'#dfe7e8'); for(let i=0;i<2;i++){R(c,X,Y+i*16,T,1,'#b9c6c9');R(c,X+i*16,Y,1,T,'#b9c6c9')} break;
     case 'concrete': R(c,X,Y,T,T,'#9c9b96'); for(let i=0;i<6;i++)R(c,X+Math.floor(rnd(x,y,i)*30),Y+Math.floor(rnd(y,x,i)*30),2,2,'#8d8c87'); break;
+    case 'cave': R(c,X,Y,T,T,'#241f33'); for(let i=0;i<7;i++)R(c,X+Math.floor(rnd(x,y,i)*30),Y+Math.floor(rnd(y,x,i)*30),2,2,i%3===0?'#372c52':'#1a1624'); break;
     case 'pavers': R(c,X,Y,T,T,'#b7b1a3'); R(c,X,Y,T,1,'#9b9588'); R(c,X,Y+16,T,1,'#9b9588'); R(c,X+(y%2?8:24),Y,1,16,'#9b9588'); R(c,X+(y%2?24:8),Y+16,1,16,'#9b9588'); break;
     case 'sidewalk': R(c,X,Y,T,T,'#bfbcb4'); R(c,X,Y,1,T,'#a5a29a'); R(c,X,Y,T,1,'#a5a29a');
       for(let i=0;i<4;i++)R(c,X+Math.floor(rnd(x,y,i)*30),Y+Math.floor(rnd(y,x,i)*30),1,1,'#a5a29a'); break;
@@ -596,6 +638,14 @@ function drawThing(c,f,x,y,ch){
       if(L!=='H')R(c,X+2,Y+8,3,16,'#2a2e38'); if(Rt!=='H')R(c,X+T-5,Y+8,3,16,'#2a2e38'); break;
     case 'U': R(c,X,Y,T,T,'#cfc7b2');for(let i=0;i<3;i++){R(c,X,Y+i*11+9,T,2,'#9b9588');R(c,X,Y+i*11,T,2,'#e8e1d2')} break;
     case 'g': R(c,X+15,Y+6,3,24,'#555b68');R(c,X+4,Y+2,24,9,'#1f6b45');R(c,X+6,Y+5,20,1,'#fff');R(c,X+6,Y+7,13,1,'#fff'); break;
+    case 'Z': R(c,X+3,Y+1,26,30,'#131019');R(c,X+3,Y+1,26,4,'#0b0a10');R(c,X+3,Y+27,26,4,'#0b0a10');
+      for(let i=0;i<7;i++){const on=rnd(x,y,i+4)>.35;R(c,X+7+(i%2)*15,Y+7+Math.floor(i/2)*5,4,2,on?['#3ddc71','#3d9ddc','#e3b04b'][i%3]:'#241f2c')} break;
+    case 'y': c.fillStyle='#372c52';c.beginPath();c.moveTo(X+9,Y);c.lineTo(X+23,Y);c.lineTo(X+16,Y+15);c.closePath();c.fill();
+      c.fillStyle='#4a3d6b';c.beginPath();c.moveTo(X+12,Y);c.lineTo(X+19,Y);c.lineTo(X+16,Y+9);c.closePath();c.fill(); break;
+    case 'v': c.fillStyle='#100d16';
+      [[10,3],[18,2],[14,7]].forEach(([bx,by])=>{c.beginPath();c.ellipse(X+bx,Y+by,2.6,2,0,0,7);
+        c.moveTo(X+bx-2,Y+by-1);c.lineTo(X+bx-7,Y+by-3);c.lineTo(X+bx-2,Y+by+2);
+        c.moveTo(X+bx+2,Y+by-1);c.lineTo(X+bx+7,Y+by-3);c.lineTo(X+bx+2,Y+by+2);c.fill()}); break;
     case 'Y': if(L!=='Y'){ R(c,X+2,Y+6,92,22,'rgba(0,0,0,.3)');R(c,X,Y+3,92,22,'#f2c230');R(c,X+20,Y+5,48,18,'#d9a91f');R(c,X+24,Y+6,14,16,'#22303f');R(c,X+52,Y+6,12,16,'#22303f');
         R(c,X+40,Y+8,10,12,'#f2c230');R(c,X+41,Y+11,8,6,'#1a1c24');R(c,X,Y+5,3,5,'#fff6c4');R(c,X,Y+18,3,5,'#fff6c4');R(c,X+89,Y+5,3,5,'#C4122F');R(c,X+89,Y+18,3,5,'#C4122F');
         for(let i=0;i<9;i++)R(c,X+4+i*10,Y+13,5,2,i%2?'#1a1c24':'#f2c230'); } break;
@@ -622,36 +672,74 @@ function buildFloor(f){
    Avatars
    ===================================================================== */
 function drawAvatar(c,fx,fy,e){
-  const lk=e.look, step=e.moving?Math.floor(e.animT*8)%2:0, lion=e.species==='lion';
-  const skin=lion?'#d9a05b':SKINS[lk.k], shirt=SHIRTS[lk.s], hair=HAIRS[lk.h], dir=e.dir||'down';
+  if(e.species==='lion'){drawLionAvatar(c,fx,fy,e);return}
+  const lk=e.look, step=e.moving?Math.floor(e.animT*8)%2:0, dir=e.dir||'down';
+  const skin=SKINS[lk.k], shirt=SHIRTS[lk.s], hair=HAIRS[lk.h];
   c.fillStyle='rgba(0,0,0,.28)';c.beginPath();c.ellipse(fx,fy,10,4,0,0,7);c.fill();
-  const pants=lion?'#b57f3f':'#2b2d38';
+  const pants='#2b2d38';
   R(c,fx-6,fy-9,5,e.moving&&step?6:9,pants); R(c,fx+1,fy-9,5,e.moving&&!step?6:9,pants);
   R(c,fx-8,fy-21,16,13,shirt); R(c,fx-8,fy-10,16,2,'rgba(0,0,0,.2)');
   R(c,fx-11,fy-20,3,8,shirt);R(c,fx+8,fy-20,3,8,shirt);R(c,fx-11,fy-12,3,3,skin);R(c,fx+8,fy-12,3,3,skin);
-  if(lion){R(c,fx-8,fy-21,16,4,'#C4122F');R(c,fx+2,fy-17,4,6,'#C4122F')}
   const y0=fy-35+(e.moving&&step?1:0);
-  if(lion){R(c,fx-9,y0-2,5,5,skin);R(c,fx+4,y0-2,5,5,skin);R(c,fx-8,y0-1,3,3,'#f0c9a0');R(c,fx+5,y0-1,3,3,'#f0c9a0')}
   R(c,fx-8,y0,16,14,skin);
-  if(!lion){
-    const st=lk.y;
-    if(st===3){R(c,fx-9,y0-1,18,6,shirt); if(dir==='down')R(c,fx-9,y0+4,18,2,'rgba(0,0,0,.35)'); if(dir==='left')R(c,fx-13,y0+3,6,2,shirt); if(dir==='right')R(c,fx+7,y0+3,6,2,shirt); if(dir==='up')R(c,fx-8,y0+5,16,5,hair)}
-    else if(st===4){R(c,fx-9,y0-1,18,5,hair);R(c,fx-9,y0,3,16,hair);R(c,fx+6,y0,3,16,hair);R(c,fx-8,y0+12,16,3,hair); if(dir==='up')R(c,fx-8,y0,16,14,hair)}
-    else{ R(c,fx-9,y0-1,18,5,hair); R(c,fx-9,y0,2,7,hair);R(c,fx+7,y0,2,7,hair);
-      if(st===1){R(c,fx-10,y0+2,3,15,hair);R(c,fx+7,y0+2,3,15,hair)}
-      if(st===2)R(c,fx-3,y0-5,6,5,hair);
-      if(dir==='up')R(c,fx-8,y0,16,st===1?14:10,hair); }
-  }
+  const st=lk.y;
+  if(st===3){R(c,fx-9,y0-1,18,6,shirt); if(dir==='down')R(c,fx-9,y0+4,18,2,'rgba(0,0,0,.35)'); if(dir==='left')R(c,fx-13,y0+3,6,2,shirt); if(dir==='right')R(c,fx+7,y0+3,6,2,shirt); if(dir==='up')R(c,fx-8,y0+5,16,5,hair)}
+  else if(st===4){R(c,fx-9,y0-1,18,5,hair);R(c,fx-9,y0,3,16,hair);R(c,fx+6,y0,3,16,hair);R(c,fx-8,y0+12,16,3,hair); if(dir==='up')R(c,fx-8,y0,16,14,hair)}
+  else{ R(c,fx-9,y0-1,18,5,hair); R(c,fx-9,y0,2,7,hair);R(c,fx+7,y0,2,7,hair);
+    if(st===1){R(c,fx-10,y0+2,3,15,hair);R(c,fx+7,y0+2,3,15,hair)}
+    if(st===2)R(c,fx-3,y0-5,6,5,hair);
+    if(dir==='up')R(c,fx-8,y0,16,st===1?14:10,hair); }
   const eye='#1d1a1b';
-  if(dir==='down'){R(c,fx-5,y0+7,2,3,eye);R(c,fx+3,y0+7,2,3,eye); if(lion){R(c,fx-3,y0+9,6,4,'#f0c9a0');R(c,fx-1,y0+9,2,2,eye)}}
-  else if(dir==='left'){R(c,fx-6,y0+7,2,3,eye); if(lion)R(c,fx-9,y0+9,4,3,'#f0c9a0')}
-  else if(dir==='right'){R(c,fx+4,y0+7,2,3,eye); if(lion)R(c,fx+5,y0+9,4,3,'#f0c9a0')}
+  if(dir==='down'){R(c,fx-5,y0+7,2,3,eye);R(c,fx+3,y0+7,2,3,eye)}
+  else if(dir==='left'){R(c,fx-6,y0+7,2,3,eye)}
+  else if(dir==='right'){R(c,fx+4,y0+7,2,3,eye)}
+}
+/* Mack, the mountain-lion mascot costume. Also worn by any player who picks the "Mack" outfit. */
+function drawLionAvatar(c,fx,fy,e){
+  const step=e.moving?Math.floor(e.animT*8)%2:0, dir=e.dir||'down';
+  const fur='#c9924f', furD='#a9723a', cream='#f2decb', dark='#2a1a10', shirt='#C4122F', shirtD='#8e0f24';
+  c.fillStyle='rgba(0,0,0,.28)';c.beginPath();c.ellipse(fx,fy,10,4,0,0,7);c.fill();
+  // tail, swinging behind
+  const sway=step?4:-2;
+  c.strokeStyle=fur;c.lineWidth=4;c.lineCap='round';
+  c.beginPath();c.moveTo(fx+6,fy-13);c.quadraticCurveTo(fx+15+sway,fy-17,fx+12+sway,fy-27);c.stroke();
+  c.fillStyle=furD;c.beginPath();c.arc(fx+12+sway,fy-27,2.4,0,7);c.fill();
+  // hind legs
+  R(c,fx-6,fy-9,5,e.moving&&step?6:9,fur); R(c,fx+1,fy-9,5,e.moving&&!step?6:9,fur);
+  c.fillStyle=cream;c.beginPath();c.ellipse(fx-3.5,fy-1,3.2,2.2,0,0,7);c.ellipse(fx+3.5,fy-1,3.2,2.2,0,0,7);c.fill();
+  // body
+  c.fillStyle=fur;c.beginPath();c.ellipse(fx,fy-16,9.5,8.5,0,0,7);c.fill();
+  // Mack's red t-shirt, same in every outfit — that's how the mascot really dresses
+  c.fillStyle=shirt;c.beginPath();c.ellipse(fx,fy-17,9,7,0,0,7);c.fill();
+  c.fillStyle=shirtD;c.beginPath();c.ellipse(fx,fy-11.5,9,3,0,0,7);c.fill();
+  c.fillStyle=shirtD;c.beginPath();c.ellipse(fx,fy-21,3.4,1.6,0,0,7);c.fill();
+  c.fillStyle=shirt;c.beginPath();c.ellipse(fx-9,fy-19,3.6,3.2,0,0,7);c.ellipse(fx+9,fy-19,3.6,3.2,0,0,7);c.fill();
+  // front paws
+  c.fillStyle=fur;c.beginPath();c.ellipse(fx-10,fy-14,3.2,4.2,0,0,7);c.ellipse(fx+10,fy-14,3.2,4.2,0,0,7);c.fill();
+  c.fillStyle=cream;c.beginPath();c.ellipse(fx-10,fy-11,2.6,2.2,0,0,7);c.ellipse(fx+10,fy-11,2.6,2.2,0,0,7);c.fill();
+  const y0=fy-35+(e.moving&&step?1:0);
+  // ears
+  c.fillStyle=fur;c.beginPath();c.ellipse(fx-6,y0,4.2,4.6,0,0,7);c.ellipse(fx+6,y0,4.2,4.6,0,0,7);c.fill();
+  if(dir!=='up'){c.fillStyle='#e8b98a';c.beginPath();c.ellipse(fx-6,y0+.5,2,2.4,0,0,7);c.ellipse(fx+6,y0+.5,2,2.4,0,0,7);c.fill()}
+  // head
+  c.fillStyle=fur;c.beginPath();c.ellipse(fx,y0+8,9.5,8.5,0,0,7);c.fill();
+  if(dir==='up'){c.fillStyle=furD;c.beginPath();c.ellipse(fx,y0+9,6,5,0,0,7);c.fill();return}
+  // muzzle, nose, whiskers, eyes
+  c.fillStyle=cream;c.beginPath();c.ellipse(fx,y0+11,5.8,4.4,0,0,7);c.fill();
+  c.fillStyle=dark;c.beginPath();c.moveTo(fx-2.2,y0+8.5);c.lineTo(fx+2.2,y0+8.5);c.lineTo(fx,y0+11.2);c.closePath();c.fill();
+  const eye='#1d1a1b';
+  if(dir==='down'){
+    R(c,fx-5,y0+6,2.2,2.6,eye);R(c,fx+2.8,y0+6,2.2,2.6,eye);
+    c.strokeStyle='rgba(40,25,15,.55)';c.lineWidth=1;
+    for(const s of [-1,1]){c.beginPath();c.moveTo(fx+s*6,y0+10);c.lineTo(fx+s*11,y0+9);c.moveTo(fx+s*6,y0+11.5);c.lineTo(fx+s*11,y0+12);c.stroke();}
+  } else if(dir==='left'){ R(c,fx-6.5,y0+6,2.2,2.6,eye); }
+  else if(dir==='right'){ R(c,fx+4.3,y0+6,2.2,2.6,eye); }
 }
 
 /* =====================================================================
    State
    ===================================================================== */
-const me={id:'me',name:'',look:{s:0,k:1,h:0,y:0},floor:'1',x:20.5,y:27.5,dir:'up',moving:false,animT:0,emote:'',emoteUntil:0,emoteN:0,bubble:'',bubbleUntil:0};
+const me={id:'me',name:'',look:{s:0,k:1,h:0,y:0},species:'human',floor:'1',x:20.5,y:27.5,dir:'up',moving:false,animT:0,emote:'',emoteUntil:0,emoteN:0,bubble:'',bubbleUntil:0};
 const npcs=NPCS.map((n,i)=>({...n,id:'npc'+i,x:n.x+.5,y:n.y+.5,dir:'down',moving:false,animT:0,li:0,npc:true,bubble:'',bubbleUntil:0,emote:'',emoteUntil:0}));
 let wanderers=[];
 let path=[], pendingLook=null, lastTileKey='', cardOpen=false, scopeAll=false, target=null, started=false, stall=0;
@@ -721,7 +809,9 @@ function look(tg){
   if(!tg)return;
   if(tg.kind==='npc'){const n=tg.t,line=n.lines[n.li++%n.lines.length];facePlayer(n);say(n,line);logLine(n.name,line);return}
   const t=tg.t; if(t.sound==='piano')piano();
-  showCard(t.title,typeof t.text==='function'?t.text():t.text);
+  const text=typeof t.text==='function'?t.text():t.text;
+  if(t.computer){showWebCard(t.title,text,randomForm());return}
+  showCard(t.title,text);
 }
 function facePlayer(n){const dx=me.x-n.x,dy=me.y-n.y;n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?'left':'right'):(dy<0?'up':'down')}
 function showCard(title,text,floors,onClose){
@@ -733,7 +823,17 @@ function showCard(title,text,floors,onClose){
   card._onClose=onClose||null;card.classList.add('on');cardOpen=true;keys.clear();
   (box.querySelector('button:not([disabled])')||$('#cardClose')).focus();
 }
-function closeCard(){const card=$('#card');if(!cardOpen)return;card.classList.remove('on');cardOpen=false;const f=card._onClose;card._onClose=null;if(f)f();$('#game').focus()}
+function showWebCard(title,desc,url){
+  const w=$('#webcard');w.querySelector('h2').textContent=title;$('#wcDesc').textContent=desc;
+  $('#wcOpen').href=url;$('#wcFrame').src=url;
+  w.classList.add('on');cardOpen=true;keys.clear();$('#wcClose').focus();
+}
+function closeCard(){
+  if(!cardOpen)return;
+  const card=$('#card'); if(card.classList.contains('on')){card.classList.remove('on');const f=card._onClose;card._onClose=null;if(f)f()}
+  const w=$('#webcard'); if(w.classList.contains('on')){w.classList.remove('on');$('#wcFrame').src='about:blank'}
+  cardOpen=false;$('#game').focus();
+}
 let actx=null;
 function piano(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const notes=[261.6,329.6,392,493.9,440,392,329.6,293.7];
   notes.forEach((fq,i)=>{const o=actx.createOscillator(),g=actx.createGain(),t0=actx.currentTime+i*.16;o.type='triangle';o.frequency.value=fq;
@@ -784,14 +884,14 @@ const Net={on:false,id:null,peers:new Map(),lastSent:'',lastAt:0,
   upsert(id,v){ if(id===this.id||!v||!MAPS[v.f])return; let p=this.peers.get(id); const x=clamp(+v.x||0,0,W),y=clamp(+v.y||0,0,H),l=v.l||[];
     if(!p){p={id,x,y,animT:0,bubble:'',bubbleUntil:0,emote:'',emoteUntil:0,en:+v.en||0};this.peers.set(id,p);if(started)sys(cleanStr(v.n,16)+' walked in.')}
     if(p.floor!==v.f){p.x=x;p.y=y}
-    p.name=cleanStr(v.n,16)||'Someone';p.look={s:cleanIdx(l[0],SHIRTS.length),k:cleanIdx(l[1],SKINS.length),h:cleanIdx(l[2],HAIRS.length),y:cleanIdx(l[3],STYLES.length)};
+    p.name=cleanStr(v.n,16)||'Someone';p.look={s:cleanIdx(l[0],SHIRTS.length),k:cleanIdx(l[1],SKINS.length),h:cleanIdx(l[2],HAIRS.length),y:cleanIdx(l[3],STYLES.length)};p.species=v.sp?'lion':'human';
     p.floor=v.f;p.tx=x;p.ty=y;p.dir=['up','down','left','right'].includes(v.d)?v.d:'down';p.seen=performance.now();
     if((+v.en||0)!==p.en){p.en=+v.en||0;if(EMOTES.includes(v.e)){p.emote=v.e;p.emoteUntil=performance.now()+2800}} },
   push(force){ if(!this.on||!this.meRef)return; const now=performance.now();
-    const s=[me.floor,me.x.toFixed(2),me.y.toFixed(2),me.dir,me.emoteN].join('|');
+    const s=[me.floor,me.x.toFixed(2),me.y.toFixed(2),me.dir,me.emoteN,me.species].join('|');
     if(!force&&(s===this.lastSent?now-this.lastAt<20000:now-this.lastAt<100))return;
     this.lastSent=s;this.lastAt=now;
-    this.meRef.set({n:me.name,l:[me.look.s,me.look.k,me.look.h,me.look.y],f:me.floor,x:+me.x.toFixed(2),y:+me.y.toFixed(2),d:me.dir,e:me.emote,en:me.emoteN,t:this.TS}).catch(()=>{}) },
+    this.meRef.set({n:me.name,l:[me.look.s,me.look.k,me.look.h,me.look.y],sp:me.species==='lion'?1:0,f:me.floor,x:+me.x.toFixed(2),y:+me.y.toFixed(2),d:me.dir,e:me.emote,en:me.emoteN,t:this.TS}).catch(()=>{}) },
   chat(text,scope,area){ const r=this.chatRef.push({i:this.id,n:me.name,f:me.floor,x:+me.x.toFixed(2),y:+me.y.toFixed(2),a:area,s:scope,m:text,t:this.TS}); setTimeout(()=>r.remove().catch(()=>{}),20000) },
   tick(dt){ const now=performance.now(); for(const [id,p] of this.peers){ if(now-p.seen>70000){this.peers.delete(id);continue}
       const dx=p.tx-p.x,dy=p.ty-p.y,d=Math.hypot(dx,dy); if(d>6){p.x=p.tx;p.y=p.ty;p.moving=false}
@@ -910,6 +1010,7 @@ cv.addEventListener('pointerdown',e=>{
 });
 $('#act').onclick=()=>look(target);
 $('#cardClose').onclick=closeCard;
+$('#wcClose').onclick=closeCard;
 $('#scope').onclick=()=>{scopeAll=!scopeAll;$('#scope').textContent=scopeAll?'Everyone':'Nearby';hudT=0};
 EMOTES.forEach((em,i)=>{const b=document.createElement('button');b.textContent=em;b.title='Emote '+(i+1);b.onclick=()=>{emote(i);cv.focus()};$('#emotes').appendChild(b)});
 
@@ -949,24 +1050,31 @@ function drawFacade(){
   // lamp glow
   R(c,172,178,2,26,'#1a1c24');R(c,169,175,8,4,'#f2cf7a');c.fillStyle='rgba(242,207,122,.18)';c.beginPath();c.arc(173,180,16,0,7);c.fill();
 }
-function drawPreview(){const c=$('#preview').getContext('2d');c.clearRect(0,0,48,60);c.fillStyle='#12141a';c.fillRect(0,0,48,60);drawAvatar(c,24,52,{look:me.look,dir:'down',moving:false,animT:0})}
+function drawPreview(){const c=$('#preview').getContext('2d');c.clearRect(0,0,48,60);c.fillStyle='#12141a';c.fillRect(0,0,48,60);drawAvatar(c,24,52,{look:me.look,species:me.species,dir:'down',moving:false,animT:0})}
 function picker(label,key,list,asText){
-  const row=document.createElement('div');row.className='pick';const s=document.createElement('span');s.textContent=label;const sw=document.createElement('div');sw.className='sw'+(asText?' txt':'');
+  const row=document.createElement('div');row.className='pick';row.dataset.key=key;const s=document.createElement('span');s.textContent=label;const sw=document.createElement('div');sw.className='sw'+(asText?' txt':'');
   list.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',label+' '+(asText?v:i+1));if(asText)b.textContent=v;else b.style.background=v;
     b.setAttribute('aria-pressed',me.look[key]===i);b.onclick=()=>{me.look[key]=i;[...sw.children].forEach((o,j)=>o.setAttribute('aria-pressed',j===i));drawPreview()};sw.appendChild(b)});
   row.append(s,sw);$('#pickers').appendChild(row);
 }
+function outfitPicker(){
+  const row=document.createElement('div');row.className='pick';const s=document.createElement('span');s.textContent='Outfit';const sw=document.createElement('div');sw.className='sw txt';
+  [['Human','human'],['Mack','lion']].forEach(([label,val])=>{const b=document.createElement('button');b.type='button';b.textContent=label;
+    b.setAttribute('aria-pressed',me.species===val);b.onclick=()=>{me.species=val;[...sw.children].forEach(o=>o.setAttribute('aria-pressed',o===b));updateOutfitDim();drawPreview()};sw.appendChild(b)});
+  row.append(s,sw);$('#pickers').appendChild(row);
+}
+function updateOutfitDim(){const dim=me.species==='lion';['s','k','h'].forEach(key=>{const row=$('#pickers').querySelector('.pick[data-key="'+key+'"]');if(row)row.classList.toggle('dim',dim)})}
 function initJoin(){
-  try{const sv=JSON.parse(localStorage.getItem('macTown')||'null');if(sv){$('#nameIn').value=cleanStr(sv.name,16);me.look={s:cleanIdx(sv.look.s,8),k:cleanIdx(sv.look.k,6),h:cleanIdx(sv.look.h,8),y:cleanIdx(sv.look.y,5)}}}catch(e){}
+  try{const sv=JSON.parse(localStorage.getItem('macTown')||'null');if(sv){$('#nameIn').value=cleanStr(sv.name,16);me.look={s:cleanIdx(sv.look.s,8),k:cleanIdx(sv.look.k,6),h:cleanIdx(sv.look.h,8),y:cleanIdx(sv.look.y,5)};me.species=sv.species==='lion'?'lion':'human'}}catch(e){}
   const sp=new URLSearchParams(location.search).get('space');if(sp)$('#spaceIn').value=cleanStr(sp,24);
-  drawFacade();picker('Shirt','s',SHIRTS);picker('Skin','k',SKINS);picker('Hair','h',HAIRS);picker('Style','y',STYLES,true);drawPreview();
+  drawFacade();outfitPicker();picker('Shirt','s',SHIRTS);picker('Skin','k',SKINS);picker('Hair','h',HAIRS);picker('Style','y',STYLES,true);updateOutfitDim();drawPreview();
   if(FIREBASE_CONFIG){$('#spaceField').hidden=false;$('#mode').textContent='Live. Anyone who opens this page with the same space code shares the building with you.'}
   else $('#mode').textContent='Solo preview with a few characters to talk to. Add a Firebase config at the top of the file to share the building with other people.';
   $('#enter').onclick=enter; $('#nameIn').addEventListener('keydown',e=>{if(e.key==='Enter')enter()});
 }
 async function enter(){
   if(started)return; me.name=cleanStr($('#nameIn').value.trim(),16)||'Guest';
-  try{localStorage.setItem('macTown',JSON.stringify({name:me.name,look:me.look}))}catch(e){}
+  try{localStorage.setItem('macTown',JSON.stringify({name:me.name,look:me.look,species:me.species}))}catch(e){}
   const btn=$('#enter');btn.disabled=true;
   if(FIREBASE_CONFIG){btn.textContent='Connecting';
     try{await Net.start(cleanStr($('#spaceIn').value,24).replace(/[.#$\[\]\/\s]/g,'-')||'macaulay')}

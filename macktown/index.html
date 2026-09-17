@@ -164,16 +164,24 @@ label.f input{background:#12141a;border:2px solid #0e1016;border-radius:3px;padd
    Leave it null and the game runs solo with a few NPCs.
 
    Realtime Database rules for this game's data:
-     { "rules": { "macaulayTown": { "$space": { ".read": true, ".write": true } } } }
+     { "rules": { "MackTown": { "$space": { ".read": true, ".write": true } } } }
 
    LAYOUT
    Floors are the ASCII grids in MAPS (legend next to it). Rooms, signs
    and NPCs are plain lists right below. Room placement is an approximation
    from Macaulay's public building pages; edit freely.
    ===================================================================== */
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyB7AxV2Oc2G4cv6IqFBVYdmTcehIvOECIg",
+  authDomain: "meeting-bingo-cbb54.firebaseapp.com",
+  databaseURL: "https://meeting-bingo-cbb54-default-rtdb.firebaseio.com",
+  projectId: "meeting-bingo-cbb54",
+  storageBucket: "meeting-bingo-cbb54.firebasestorage.app",
+  messagingSenderId: "385671064397",
+  appId: "1:385671064397:web:7ce7bd2fe43ff74f0ce504"
+};
 /* const FIREBASE_CONFIG = { apiKey:"...", authDomain:"...", databaseURL:"https://YOUR-PROJECT-default-rtdb.firebaseio.com", projectId:"...", appId:"..." }; */
-const DB_ROOT = 'macaulayTown';
+const DB_ROOT = 'MackTown';
 const FIREBASE_SDK = 'https://www.gstatic.com/firebasejs/10.12.2/';
 
 const T = 32, PR = 2, W = 28, H = 32, RANGE = 4.5, SPEED = 4.6;
